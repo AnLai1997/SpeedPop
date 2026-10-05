@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>SpeedPop</string>
+	<key>items</key>
+	<array>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>BONG BÓNG TỐC ĐỘ</string>
+			<key>footerText</key><string>Khi app dẫn đường (Vietmap Live / GOFA) đang chạy nền, hiện bong bóng nhỏ với tốc độ hiện tại và biển giới hạn. Có kết nối CarPlay: chỉ hiện trên màn xe (không hiện trên iPhone); không có xe: hiện trên iPhone. Kéo để di chuyển, 2 ngón để phóng to / thu nhỏ, chạm để mở lại app, giữ để hiện nút X tắt hẳn app. Tự ẩn khi app dẫn đường hiện lại hoặc không có dữ liệu.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Bật bong bóng tốc độ</string>
+			<key>defaults</key><string>com.anlai97.speedpop</string>
+			<key>key</key><string>Enabled</string>
+			<key>default</key><true/>
+			<key>PostNotification</key><string>com.anlai97.speedpop.prefschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSLinkListCell</string>
+			<key>detail</key><string>PSListItemsController</string>
+			<key>label</key><string>Kiểu hiển thị</string>
+			<key>defaults</key><string>com.anlai97.speedpop</string>
+			<key>key</key><string>Style</string>
+			<key>default</key><integer>0</integer>
+			<key>PostNotification</key><string>com.anlai97.speedpop.prefschanged</string>
+			<key>validValues</key>
+			<array><integer>0</integer><integer>1</integer><integer>2</integer><integer>3</integer><integer>4</integer><integer>5</integer></array>
+			<key>validTitles</key>
+			<array>
+				<string>Vietmap (2 vòng tròn)</string>
+				<string>Tối giản (số lớn + biển nhỏ)</string>
+				<string>Biển báo (biển lớn, tốc độ ở góc)</string>
+				<string>Đồng hồ (vòng cung)</string>
+				<string>Thanh HUD (thanh ngang)</string>
+				<string>Màu theo tốc độ (xanh / cam / đỏ)</string>
+			</array>
+			<key>shortTitles</key>
+			<array>
+				<string>Vietmap</string><string>Tối giản</string><string>Biển báo</string>
+				<string>Đồng hồ</string><string>Thanh HUD</string><string>Màu tốc độ</string>
+			</array>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>Xem thử bong bóng (10 giây)</string>
+			<key>action</key><string>bubbleDemo</string>
+		</dict>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>LẤY TỐC ĐỘ TỪ APP</string>
+			<key>footerText</key><string>Chạy cả 2 app cùng lúc: bong bóng theo app đang chạy nền. Bật / tắt app ở đây có hiệu lực ngay; lần đầu cài cần mở lại app dẫn đường để tweak được nạp.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Vietmap Live</string>
+			<key>defaults</key><string>com.anlai97.speedpop</string>
+			<key>key</key><string>AppVietmap</string>
+			<key>default</key><true/>
+			<key>PostNotification</key><string>com.anlai97.speedpop.prefschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>GOFA</string>
+			<key>defaults</key><string>com.anlai97.speedpop</string>
+			<key>key</key><string>AppGOFA</string>
+			<key>default</key><true/>
+			<key>PostNotification</key><string>com.anlai97.speedpop.prefschanged</string>
+		</dict>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>footerText</key><string>SpeedPop by AnLai97 · log: /var/mobile/Documents/SpeedPop.log</string>
+		</dict>
+
+	</array>
+</dict>
+</plist>
