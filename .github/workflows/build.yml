@@ -1,4 +1,4 @@
-name: Build CarSpeedBubble (rootless)
+name: Build CSBubble (rootless)
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           VERSION=$(sed -n 's/^Version: *//p' control)
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p out
-          cp packages/*.deb "out/CarSpeedBubble_${VERSION}_rootless.deb"
+          cp packages/*.deb "out/CSBubble_${VERSION}_rootless.deb"
           ls -l out
 
       - name: List .deb contents
@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CarSpeedBubble_${{ env.VERSION }}_rootless
+          name: CSBubble_${{ env.VERSION }}_rootless
           path: out/*.deb
 
       # Push tag vX.Y.Z (trung Version trong control) -> tao GitHub Release kem file .deb
@@ -59,6 +59,6 @@ jobs:
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
-          name: CarSpeedBubble ${{ env.VERSION }}
+          name: CSBubble ${{ env.VERSION }}
           files: out/*.deb
           generate_release_notes: true

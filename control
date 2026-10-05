@@ -1,12 +1,12 @@
-Package: carspeedbubble
-Name: CarSpeedBubble
+Package: csbubble
+Name: CSBubble
 Version: 1.0.0
 Architecture: iphoneos-arm64
 Description: Floating speed-limit bubble (current speed + speed limit from Vietmap Live / GOFA) while the navigation app runs in the background - on the CarPlay screen when connected, otherwise on iPhone (Dopamine rootless)
 Author: anlai <laihoangan123456@gmail.com>
 Maintainer: anlai <laihoangan123456@gmail.com>
 Section: Tweaks
-Icon: file:///var/jb/Library/PreferenceBundles/CarSpeedBubblePrefs.bundle/CarSpeedBubble.png
+Icon: file:///var/jb/Library/PreferenceBundles/CSBubblePrefs.bundle/CSBubble.png
 Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0)
 Conflicts: com.anlai97.speedpop
 Replaces: com.anlai97.speedpop

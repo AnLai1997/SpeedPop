@@ -61,13 +61,13 @@ static void SPPKillApp(NSString *bid)
     id svc = objcInvoke(objc_getClass("FBSSystemService"), @"sharedService");
     SEL sel = NSSelectorFromString(@"terminateApplication:forReason:andReport:withDescription:");
     if (svc && [svc respondsToSelector:sel]) {
-        ((void (*)(id, SEL, id, long long, BOOL, id))objc_msgSend)(svc, sel, bid, 1, NO, @"CarSpeedBubble: user closed");
+        ((void (*)(id, SEL, id, long long, BOOL, id))objc_msgSend)(svc, sel, bid, 1, NO, @"CSBubble: user closed");
         SPPLog("terminate %@ (FBSSystemService)", bid);
         return;
     }
     void (*fn)(NSString *, int, BOOL, NSString *) =
         (void (*)(NSString *, int, BOOL, NSString *))dlsym(RTLD_DEFAULT, "BKSTerminateApplicationForReasonAndReportWithDescription");
-    if (fn) { fn(bid, 1, NO, @"CarSpeedBubble"); SPPLog("terminate %@ (BKS)", bid); }
+    if (fn) { fn(bid, 1, NO, @"CSBubble"); SPPLog("terminate %@ (BKS)", bid); }
     else SPPLog("khong tim thay API terminate cho %@", bid);
 }
 
@@ -484,7 +484,7 @@ static BOOL sSeenRunning[8];
 }
 
 // =====================================================================
-//  Cac kieu bong bong (Cai dat > CarSpeedBubble > Kieu hien thi). Moi kieu deu co icon app dang cap toc do.
+//  Cac kieu bong bong (Cai dat > CSBubble > Kieu hien thi). Moi kieu deu co icon app dang cap toc do.
 //    0 The ngang     : the kinh toi [icon] [toc do / km/h] [bien gioi han]
 //    1 Dia nho       : dia tron, vien mau theo trang thai, icon nho tren so, bien goc tren phai
 //    2 Bien bao      : bien gioi han lon + vien toc do (icon + so) o goc duoi phai
