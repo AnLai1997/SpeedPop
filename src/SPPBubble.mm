@@ -437,7 +437,13 @@ static BOOL sSeenRunning[8];
         self.speed = -1; self.limit = -1; self.lastUpdate = 0;
         show = NO;
     }
-    if (!show) { [self hide]; return; }
+    if (!show) {
+        if (self.window && !self.window.hidden)
+            SPPLog("bubble: an (du lieu %.1fs truoc, toc do=%d, tat=%d, app dan duong dang hien=%d)",
+                   CFAbsoluteTimeGetCurrent() - self.lastUpdate, self.speed, ![SPPPrefs enabled], [self anyAppForeground]);
+        [self hide];
+        return;
+    }
     [self ensureWindow];
     if (!self.window) return;
     if (self.onPhone) [self applyPhoneOrientationForce:NO];
