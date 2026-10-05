@@ -7,7 +7,7 @@ Tách ra từ tính năng bong bóng tốc độ của CarDuo (SplitCarPlay), b�
 
 - Dopamine rootless, iOS 15.0 – 16.6.1 (build với SDK 16.5)
 - Có xe CarPlay: bong bóng **chỉ** nằm trên màn xe, không hiện trên iPhone. Không có xe: nằm trên iPhone (xoay theo hướng máy).
-- Tự ẩn khi app dẫn đường hiện lại (trên iPhone hoặc CarPlay) hoặc 5 giây không có dữ liệu.
+- Tự ẩn khi app dẫn đường hiện lại (trên iPhone hoặc CarPlay), ẩn ngay khi app bị tắt, hoặc sau 5 giây không có dữ liệu.
 
 | App | Bundle ID |
 | --- | --- |
@@ -23,7 +23,7 @@ Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_N
 | Kéo | Di chuyển bong bóng (nhớ vị trí riêng cho iPhone / xe) |
 | 2 ngón | Phóng to / thu nhỏ (nhớ lại) |
 | Chạm | Mở lại app đang cấp tốc độ (trên xe: giao diện CarPlay của app) |
-| Giữ 0.5s | Hiện nút X đỏ: bấm để tắt hẳn app đó |
+| Giữ 3 giây | Viền đỏ chạy quanh bong bóng, chạy hết vòng thì thoát hẳn app đó (thả tay sớm để huỷ) |
 
 Cài đặt > SpeedPop (Tiếng Việt / English, mặc định theo ngôn ngữ máy):
 
@@ -33,7 +33,7 @@ Cài đặt > SpeedPop (Tiếng Việt / English, mặc định theo ngôn ngữ
 | Giao diện | Kiểu hiển thị · Hiện icon app · Xem thử 10 giây · Đặt lại vị trí & kích thước |
 | Nguồn tốc độ | Vietmap Live · GOFA |
 
-6 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ.
+12 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng.
 
 Icon: `speedpopprefs/Resources/icon*.png` (Cài đặt), `SpeedPop.png` (icon gói trong Sileo/Zebra), bản gốc `assets/icon-1024.png`.
 

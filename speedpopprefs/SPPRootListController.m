@@ -46,11 +46,17 @@ static NSString *L(NSString *key)
             @"style.3":        @[@"Đồng hồ", @"Gauge"],
             @"style.4":        @[@"Thanh HUD", @"HUD bar"],
             @"style.5":        @[@"Màu theo tốc độ", @"Speed color"],
+            @"style.6":        @[@"Cột dọc", @"Tower"],
+            @"style.7":        @[@"Viên thuốc đôi", @"Split pill"],
+            @"style.8":        @[@"Neon", @"Neon"],
+            @"style.9":        @[@"Thanh đo", @"Meter bar"],
+            @"style.10":       @[@"Chữ nổi (không nền)", @"Floating text"],
+            @"style.11":       @[@"Thẻ sáng", @"Light card"],
             @"showIcon":       @[@"Hiện icon app", @"Show app icon"],
             @"preview":        @[@"Xem thử (10 giây)", @"Preview (10 seconds)"],
             @"reset":          @[@"Đặt lại vị trí & kích thước", @"Reset position & size"],
-            @"appearance.footer": @[@"Kéo để di chuyển · chụm 2 ngón để đổi cỡ · chạm để mở lại app · giữ để hiện nút X tắt hẳn app.",
-                                    @"Drag to move · pinch to resize · tap to reopen the app · long-press for an X button that quits the app."],
+            @"appearance.footer": @[@"Kéo để di chuyển · chụm 2 ngón để đổi cỡ · chạm để mở lại app · giữ 3 giây (viền đỏ chạy hết vòng) để thoát hẳn app.",
+                                    @"Drag to move · pinch to resize · tap to reopen the app · hold for 3 seconds (until the red ring completes) to quit the app."],
             @"sources":        @[@"NGUỒN TỐC ĐỘ", @"SPEED SOURCES"],
             @"sources.footer": @[@"Icon trên bong bóng cho biết tốc độ đang lấy từ app nào. Chạy cả hai app: bong bóng theo app đang chạy nền. Lần đầu cài, mở lại app dẫn đường để tweak được nạp.",
                                  @"The icon on the bubble shows which app the speed comes from. With both apps running, the bubble follows the one in the background. After the first install, relaunch the navigation app so the tweak loads."],
@@ -114,8 +120,9 @@ static NSString *L(NSString *key)
         [a addObject:[self group:L(@"appearance") footer:L(@"appearance.footer")]];
         PSSpecifier *style = [self pref:L(@"style") key:@"Style" cell:PSLinkListCell default:@0];
         NSMutableArray *titles = [NSMutableArray array];
-        for (int i = 0; i <= 5; i++) [titles addObject:L([NSString stringWithFormat:@"style.%d", i])];
-        [style setValues:@[@0, @1, @2, @3, @4, @5] titles:titles shortTitles:titles];
+        NSMutableArray *values = [NSMutableArray array];
+        for (int i = 0; i < 12; i++) { [values addObject:@(i)]; [titles addObject:L([NSString stringWithFormat:@"style.%d", i])]; }
+        [style setValues:values titles:titles shortTitles:titles];
         [a addObject:style];
         [a addObject:[self pref:L(@"showIcon") key:@"ShowAppIcon" cell:PSSwitchCell default:@YES]];
         [a addObject:[self button:L(@"preview") action:@selector(bubbleDemo)]];

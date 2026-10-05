@@ -11,7 +11,7 @@ static id value(NSString *key)
 }
 
 + (BOOL)enabled    { id v = value(@"Enabled"); return v ? [v boolValue] : YES; }
-+ (NSInteger)style { id v = value(@"Style");   NSInteger i = v ? [v integerValue] : 0; return (i >= 0 && i <= 5) ? i : 0; }
++ (NSInteger)style { id v = value(@"Style");   NSInteger i = v ? [v integerValue] : 0; return (i >= 0 && i < 12) ? i : 0; }
 
 + (BOOL)showAppIcon { id v = value(@"ShowAppIcon"); return v ? [v boolValue] : YES; }
 
