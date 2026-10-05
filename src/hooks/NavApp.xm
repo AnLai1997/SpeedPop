@@ -176,7 +176,10 @@ static void SPPCollectAX(id node, NSMutableArray<NSDictionary *> *out, NSMutable
         NSMutableString *text = [NSMutableString string];
         if ([label isKindOfClass:[NSString class]] && label.length) [text appendString:label];
         if ([value isKindOfClass:[NSString class]] && value.length) { if (text.length) [text appendString:@" "]; [text appendString:value]; }
-        if (text.length && ![node isKindOfClass:[UIView class]]) {   // UIView thuong la container; phan tu that la UIAccessibilityElement
+        // UIView thuong la container (Flutter: phan tu that la UIAccessibilityElement); rieng view tu khai la phan tu
+        // accessibility (vd chu cua React Native: RCTParagraphComponentView) thi lay luon
+        BOOL isElement = ![node isKindOfClass:[UIView class]] || [(UIView *)node isAccessibilityElement];
+        if (text.length && isElement) {
             CGRect f = [node respondsToSelector:@selector(accessibilityFrame)] ? [node accessibilityFrame] : CGRectZero;
             [out addObject:@{@"t": [text copy], @"f": [NSValue valueWithCGRect:f]}];
         }
@@ -501,6 +504,34 @@ static BOOL SPPReadCachedViews(BOOL doLog)
     return YES;
 }
 
+// Chan doan (app moi nhu GOFA): cac view co ten lop goi y toc do / bien bao, kem so ben trong va loai noi dung
+static void SPPCollectNamedViews(UIView *v, NSMutableString *out, int depth, int *count)
+{
+    if (depth > 40 || *count >= 25 || v.hidden) return;
+    NSString *cls = NSStringFromClass([v class]);
+    NSString *lc = [cls lowercaseString];
+    for (NSString *k in @[@"limit", @"speed", @"sign", @"traffic", @"warning"]) {
+        if ([lc containsString:k]) {
+            CGRect r = [v convertRect:v.bounds toView:nil];
+            int n = SPPNumberInView(v);
+            NSString *ax = [v.accessibilityLabel isKindOfClass:[NSString class]] ? v.accessibilityLabel : nil;
+            [out appendFormat:@" %@(%.0f,%.0f %.0fx%.0f so=%d%@%@)", cls, r.origin.x, r.origin.y, r.size.width, r.size.height, n,
+                 [v isKindOfClass:[UIImageView class]] ? @" anh" : @"", ax.length ? [NSString stringWithFormat:@" ax=\"%@\"", ax] : @""];
+            (*count)++;
+            break;
+        }
+    }
+    for (UIView *c in v.subviews) SPPCollectNamedViews(c, out, depth + 1, count);
+}
+
+static NSString *SPPDescribeNamedViews(UIView *root)
+{
+    if (!root) return @" (khong co cua so)";
+    NSMutableString *out = [NSMutableString string]; int count = 0;
+    SPPCollectNamedViews(root, out, 0, &count);
+    return out.length ? out : @" (khong co)";
+}
+
 static void SPPScanSpeed(BOOL doLog)
 {
     NSArray<UIWindow *> *wins = SPPAllWindows();
@@ -534,8 +565,9 @@ static void SPPScanSpeed(BOOL doLog)
     UIView *limitView = nil, *speedView = nil;
     NSMutableString *desc = [NSMutableString string];
     for (UILabel *l in labels) {
-        UIView *lv = SPPAncestorNamed(l, @"SpeedLimit");
-        UIView *cv = lv ? nil : SPPAncestorNamed(l, @"CurrentSpeed");
+        // Ten lop: Vietmap SpeedLimitView2 / CurrentSpeedView; app khac thuong co "Limit" (MaxSpeed, LimitSign...)
+        UIView *lv = SPPAncestorNamed(l, @"Limit") ?: SPPAncestorNamed(l, @"MaxSpeed");
+        UIView *cv = lv ? nil : (SPPAncestorNamed(l, @"CurrentSpeed") ?: SPPAncestorNamed(l, @"Speedometer"));
         UIView *circle = SPPCircleAround(l);
         int kind = lv ? 1 : (cv ? 2 : 0);
         if (!kind && circle) {
@@ -560,6 +592,7 @@ static void SPPScanSpeed(BOOL doLog)
     // Da tung thay view gioi han ma lan nay khong thay so -> duong hien tai khong co bien
     if (limit < 0 && sLimitView && !limitL) { sScanLimit = -1; sScanLimitAt = CFAbsoluteTimeGetCurrent(); }
     if (doLog) SPPLog("speed scan: toc do=%d gioi han=%d; ung vien:%@", speed, limit, desc);
+    if (doLog && limit < 0) SPPLog("speed scan: chua thay gioi han; view lien quan:%@", SPPDescribeNamedViews(win));
 }
 
 // Nhip quet man hinh 0.5s: lay gioi han (va toc do du phong khi khong co GPS)

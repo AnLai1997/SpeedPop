@@ -6,5 +6,6 @@
 @interface SPPPrefs : NSObject
 + (BOOL)enabled;          // bat bong bong
 + (NSInteger)style;       // 0 Vietmap, 1 Toi gian, 2 Bien bao, 3 Dong ho, 4 HUD, 5 Mau toc do
++ (BOOL)showAppIcon;      // hien icon app dang cap toc do tren bong bong
 + (BOOL)appEnabled:(int)appIndex;   // nhan toc do tu app nay (chi so trong SPP_NAV_APPS)
 @end

@@ -10,6 +10,7 @@
 #define SPP_RING        56.0  // duong kinh moi vong
 #define SPP_RING_GAP    10.0
 #define SPP_PAD         8.0
+#define SPP_BADGE       20.0  // icon app o goc tren trai cua the
 
 // ---------------------------------------------------------------------
 //  Cua so: man xe (UIRootSceneWindow tren CADisplay cua CarPlay) hoac man iPhone
@@ -96,6 +97,36 @@ static void SPPMakeWindowPassThrough(UIWindow *w)
     object_setClass(w, cls);
 }
 
+@interface UIImage (SPPPrivate)
++ (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)bid format:(int)format scale:(CGFloat)scale;
+@end
+
+// Icon cua app (API rieng cua UIKit, co trong SpringBoard); khong lay duoc -> o tron mau co chu viet tat
+static UIImage *SPPAppIcon(int app)
+{
+    static NSMutableDictionary<NSNumber *, UIImage *> *cache;
+    if (!cache) cache = [NSMutableDictionary dictionary];
+    UIImage *img = cache[@(app)];
+    if (img) return img;
+    if ([UIImage respondsToSelector:@selector(_applicationIconImageForBundleIdentifier:format:scale:)])
+        img = [UIImage _applicationIconImageForBundleIdentifier:SPPNavAppBundle(app) format:2 scale:[UIScreen mainScreen].scale];
+    if (!img) {
+        CGFloat d = 60;
+        UIGraphicsImageRenderer *r = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(d, d)];
+        img = [r imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+            UIColor *bg = app == 1 ? [UIColor colorWithRed:0.0 green:0.6 blue:0.45 alpha:1] : [UIColor colorWithRed:0.1 green:0.4 blue:0.85 alpha:1];
+            [bg setFill]; [[UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, d, d)] fill];
+            NSString *t = app == 1 ? @"GO" : @"VM";
+            NSDictionary *a = @{NSFontAttributeName: [UIFont systemFontOfSize:26 weight:UIFontWeightHeavy], NSForegroundColorAttributeName: [UIColor whiteColor]};
+            CGSize ts = [t sizeWithAttributes:a];
+            [t drawAtPoint:CGPointMake((d - ts.width) / 2, (d - ts.height) / 2) withAttributes:a];
+        }];
+        SPPLog("bubble: khong lay duoc icon %@ -> dung chu viet tat", SPPNavAppBundle(app));
+    }
+    cache[@(app)] = img;
+    return img;
+}
+
 @interface SpringBoard : UIApplication
 - (BOOL)launchApplicationWithIdentifier:(NSString *)identifier suspended:(BOOL)suspended;
 @end
@@ -111,6 +142,8 @@ static void SPPMakeWindowPassThrough(UIWindow *w)
 @property (nonatomic) BOOL onPhone;
 @property (nonatomic) CGFloat scale;                 // phong to/thu nho bang 2 ngon (SPP_SCALE_MIN .. SPP_SCALE_MAX), luu lai
 @property (nonatomic) int app;                       // chi so SPP_NAV_APPS cua app dang cap toc do (cham / X dung app nay)
+@property (nonatomic, strong) UIImageView *appBadge; // icon nho cua app dang cap toc do (goc tren trai the)
+@property (nonatomic) int badgeApp;                  // app dang ve tren appBadge (-1 = chua ve)
 @property (nonatomic, strong) UIButton *closeButton; // X do: giu bong bong de hien, bam de tat han app
 @property (nonatomic, strong) NSTimer *closeTimer;
 @property (nonatomic) NSInteger builtStyle;          // kieu dang ve trong the (-1 = chua ve)
@@ -385,6 +418,14 @@ static UIColor *SPPGreen(void)  { return [UIColor colorWithRed:0.18 green:0.72 b
     flash.userInteractionEnabled = NO;
     [card insertSubview:flash atIndex:0];   // sau noi dung (ke ca cung cua kieu Dong ho)
     self.flashView = flash;
+    // Icon app dang cap toc do: tren cung, goc tren trai
+    UIImageView *badge = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, SPP_BADGE, SPP_BADGE)];
+    badge.layer.cornerRadius = SPP_BADGE * 0.25;
+    badge.layer.masksToBounds = YES;
+    badge.layer.borderWidth = 1.5; badge.layer.borderColor = [UIColor whiteColor].CGColor;
+    badge.userInteractionEnabled = NO;
+    [card addSubview:badge];
+    self.appBadge = badge; self.badgeApp = -1;
     self.unitLabel.text = @"km/h";
     self.builtStyle = style;
     SPPLog("bubble: kieu %ld", (long)style);
@@ -525,7 +566,20 @@ static UIColor *SPPGreen(void)  { return [UIColor colorWithRed:0.18 green:0.72 b
         self.flashView.layer.cornerRadius = self.card.layer.cornerRadius;
     }
     [self setOverLimitWarning:(state == 2)];
+    [self renderAppBadge];
     [self clampCard];
+}
+
+// Icon app o goc tren trai (the toi: lech ra ngoai 1 chut de khong che so); Cai dat co the tat
+- (void)renderAppBadge
+{
+    UIImageView *b = self.appBadge;
+    b.hidden = ![SPPPrefs showAppIcon];
+    if (b.hidden) return;
+    if (self.badgeApp != self.app) { b.image = SPPAppIcon(self.app); self.badgeApp = self.app; }
+    CGFloat inset = (self.builtStyle == 2 || self.builtStyle == 3 || self.builtStyle == 5) ? 4 : -4;   // the tron / khong nen: dat sat vao trong
+    b.center = CGPointMake(SPP_BADGE / 2 + inset, SPP_BADGE / 2 + inset);
+    [self.card bringSubviewToFront:b];
 }
 
 // "Xem thu bong bong" trong Cai dat: toc do gia 10 giay (tang qua gioi han 60 de thay doi mau)
