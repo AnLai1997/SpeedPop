@@ -1,6 +1,6 @@
 Package: com.anlai97.speedpop
 Name: SpeedPop
-Version: 0.7.1
+Version: 0.7.2
 Architecture: iphoneos-arm64
 Description: Floating speed bubble (current speed + speed limit from Vietmap Live / GOFA) while the navigation app runs in the background - on the CarPlay screen only when connected, otherwise on iPhone (Dopamine rootless, iOS 16.5)
 Author: AnLai97 <laihoangan123456@gmail.com>
