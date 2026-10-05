@@ -30,6 +30,7 @@ static inline NSString *SPPNavAppName(int i)   { return (i >= 0 && i < SPP_NAV_A
 // Cai dat -> SpringBoard: xem thu bong bong / cau hinh vua doi
 #define SPP_DARWIN_DEMO         "com.anlai97.speedpop.demo"
 #define SPP_DARWIN_PREFS        "com.anlai97.speedpop.prefschanged"
+#define SPP_DARWIN_RESET        "com.anlai97.speedpop.resetlayout"   // dat lai vi tri + kich thuoc bong bong
 // SpringBoard -> process CarPlay: mo app dan duong tren man xe (cham bong bong); state = chi so app
 #define SPP_DARWIN_OPEN_CAR     "com.anlai97.speedpop.opencar"
 // App dan duong (sandbox) -> SpringBoard: chuyen tiep 1 dong log

@@ -14,7 +14,7 @@ Tách ra từ tính năng bong bóng tốc độ của CarDuo (SplitCarPlay), b�
 | Vietmap Live | `vn.vietmap.live` |
 | GOFA | `com.lumi.GOFA` |
 
-Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_NAMES` (`src/common.h`), vào `SpeedPop.plist`, thêm khoá bật/tắt trong `SPPPrefs.mm` và `Root.plist`.
+Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_NAMES` (`src/common.h`), vào `SpeedPop.plist`, thêm khoá bật/tắt trong `SPPPrefs.mm` và `speedpopprefs/SPPRootListController.m`.
 
 ## Thao tác
 
@@ -25,7 +25,15 @@ Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_N
 | Chạm | Mở lại app đang cấp tốc độ (trên xe: giao diện CarPlay của app) |
 | Giữ 0.5s | Hiện nút X đỏ: bấm để tắt hẳn app đó |
 
-Cài đặt > SpeedPop: bật/tắt, 6 kiểu hiển thị (Vietmap, Tối giản, Biển báo, Đồng hồ, Thanh HUD, Màu tốc độ), xem thử 10 giây, bật/tắt riêng từng app (Vietmap Live / GOFA).
+Cài đặt > SpeedPop (Tiếng Việt / English, mặc định theo ngôn ngữ máy):
+
+| Nhóm | Mục |
+| --- | --- |
+| Chung | Bật bong bóng · Ngôn ngữ |
+| Giao diện | Kiểu hiển thị · Hiện icon app · Xem thử 10 giây · Đặt lại vị trí & kích thước |
+| Nguồn tốc độ | Vietmap Live · GOFA |
+
+6 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ.
 
 Icon: `speedpopprefs/Resources/icon*.png` (Cài đặt), `SpeedPop.png` (icon gói trong Sileo/Zebra), bản gốc `assets/icon-1024.png`.
 
