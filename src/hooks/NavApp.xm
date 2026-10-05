@@ -491,12 +491,117 @@ static int SPPNumberInView(UIView *root)
     return best ? [best.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].intValue : -1;
 }
 
+// ---------------------------------------------------------------------
+//  Bien gioi han dang ANH (vd GOFA canh bao bang hinh): doc so tu ten asset cua anh, vd "ic_speed_limit_60".
+//  Giu tham chieu yeu toi UIImageView da gap de doc tiep khi app chay nen.
+// ---------------------------------------------------------------------
+static __weak UIImageView *sLimitImageView;
+
+// Ten asset: lay tu mo ta "<UIImage:0x.. named(main: ic_limit_60) {48, 48} ...>" (nil neu anh khong co ten)
+static NSString *SPPImageName(UIImage *img)
+{
+    if (!img) return nil;
+    NSString *d = img.description;
+    NSRange r = [d rangeOfString:@"named("];
+    if (r.location == NSNotFound) return nil;
+    NSUInteger s = NSMaxRange(r);
+    NSRange e = [d rangeOfString:@")" options:0 range:NSMakeRange(s, d.length - s)];
+    if (e.location == NSNotFound) return nil;
+    NSString *n = [d substringWithRange:NSMakeRange(s, e.location - s)];
+    NSRange colon = [n rangeOfString:@": "];
+    return colon.location != NSNotFound ? [n substringFromIndex:NSMaxRange(colon)] : n;
+}
+
+// Gioi han tu ten anh / nhan: phai co tu khoa (limit, speed, max, toc, bien, sign) va so 5..200 (lay so cuoi)
+static int SPPLimitFromName(NSString *name)
+{
+    if (name.length == 0) return -1;
+    NSString *l = name.lowercaseString;
+    BOOL kw = NO;
+    for (NSString *k in @[@"limit", @"speed", @"max", @"toc", @"bien", @"sign", @"kmh"]) if ([l containsString:k]) { kw = YES; break; }
+    if (!kw) return -1;
+    int found = -1;
+    NSScanner *sc = [NSScanner scannerWithString:l];
+    while (!sc.isAtEnd) {
+        [sc scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:nil];
+        int v = 0;
+        if ([sc scanInt:&v]) { if (v >= 5 && v <= 200) found = v; } else break;
+    }
+    return found;
+}
+
+static int SPPLimitFromImageView(UIImageView *iv)
+{
+    if (!iv || !iv.image) return -1;
+    int n = SPPLimitFromName(SPPImageName(iv.image));
+    if (n < 0) n = SPPLimitFromName(iv.accessibilityIdentifier);
+    if (n < 0) n = SPPLimitFromName(iv.accessibilityLabel);
+    return n;
+}
+
+static void SPPCollectImageViews(UIView *v, NSMutableArray<UIImageView *> *out, int depth)
+{
+    if (depth > 45 || v.hidden || v.alpha < 0.05 || out.count > 300) return;
+    if ([v isKindOfClass:[UIImageView class]] && ((UIImageView *)v).image) [out addObject:(UIImageView *)v];
+    for (UIView *c in v.subviews) SPPCollectImageViews(c, out, depth + 1);
+}
+
+// Tim bien gioi han dang anh tren cac cua so (iPhone, CarPlay); -1 neu khong co
+static int SPPScanLimitImages(NSArray<UIWindow *> *wins)
+{
+    for (UIWindow *w in wins) {
+        NSMutableArray<UIImageView *> *ivs = [NSMutableArray array];
+        SPPCollectImageViews(w, ivs, 0);
+        for (UIImageView *iv in ivs) {
+            if (!SPPViewVisible(iv)) continue;
+            int n = SPPLimitFromImageView(iv);
+            if (n >= 0) { sLimitImageView = iv; return n; }
+        }
+    }
+    return -1;
+}
+
+// Chan doan khi chua thay gioi han: cong nghe giao dien, chu va ten anh dang hien, view co ten lien quan
+static void SPPDumpWalk(UIView *v, int depth, NSMutableSet *techs, NSMutableArray *texts, NSMutableArray *imgs)
+{
+    if (depth > 45 || v.hidden || v.alpha < 0.05) return;
+    NSString *cls = NSStringFromClass([v class]);
+    for (NSString *k in @[@"Flutter", @"RCT", @"Mapbox", @"MGL", @"Vietmap", @"Unity", @"GMS", @"MTKView", @"Metal"])
+        if ([cls containsString:k]) { [techs addObject:cls]; break; }
+    if ([v isKindOfClass:[UILabel class]] && texts.count < 50) {
+        NSString *t = ((UILabel *)v).text;
+        if (t.length) [texts addObject:[NSString stringWithFormat:@"\"%@\"", t.length > 30 ? [t substringToIndex:30] : t]];
+    }
+    if ([v isKindOfClass:[UIImageView class]] && imgs.count < 60) {
+        UIImage *im = ((UIImageView *)v).image;
+        CGRect r = [v convertRect:v.bounds toView:nil];
+        if (im && r.size.width >= 12 && r.size.height >= 12)
+            [imgs addObject:[NSString stringWithFormat:@"%@(%.0fx%.0f@%.0f,%.0f)", SPPImageName(im) ?: @"?", r.size.width, r.size.height, r.origin.x, r.origin.y]];
+    }
+    for (UIView *c in v.subviews) SPPDumpWalk(c, depth + 1, techs, texts, imgs);
+}
+
+static NSString *SPPDescribeNamedViews(UIView *root);
+
+static void SPPLogScreenDump(NSArray<UIWindow *> *wins)
+{
+    for (UIWindow *w in wins) {
+        NSMutableSet *techs = [NSMutableSet set]; NSMutableArray *texts = [NSMutableArray array], *imgs = [NSMutableArray array];
+        SPPDumpWalk(w, 0, techs, texts, imgs);
+        SPPLog("chan doan %@ (%.0fx%.0f): cong nghe=[%@] chu=[%@] anh=[%@] view lien quan:%@", NSStringFromClass([w class]),
+               w.bounds.size.width, w.bounds.size.height, [techs.allObjects componentsJoinedByString:@" "],
+               [texts componentsJoinedByString:@" "], [imgs componentsJoinedByString:@" "], SPPDescribeNamedViews(w));
+    }
+}
+
 // Doc truc tiep 2 view da gap. Tra ve NO neu khong con view nao (app da huy) -> quet lai tu dau.
 static BOOL SPPReadCachedViews(BOOL doLog)
 {
     UIView *lv = sLimitView, *cv = sSpeedView;
     if (!lv && !cv) return NO;
     int limit = lv ? SPPNumberInView(lv) : -1, speed = cv ? SPPNumberInView(cv) : -1;
+    UIImageView *liv = sLimitImageView;   // bien dang anh da gap (chi doc kem, khong thay cho quet day du)
+    if (limit < 0 && liv) { limit = (liv.window && !liv.hidden) ? SPPLimitFromImageView(liv) : -1; if (!lv) lv = liv; }
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     if (lv) { sScanLimit = (limit >= 5 && limit <= 200) ? limit : -1; sScanLimitAt = now; }   // view an = duong khong co bien
     if (speed >= 0 && speed <= 300) { sScanSpeed = speed; sScanSpeedAt = now; }
@@ -555,6 +660,8 @@ static void SPPScanSpeed(BOOL doLog)
         if (doLog) SPPLog("speed scan (AX, %lu cua so, trung %@): toc do=%d gioi han=%d; %@", (unsigned long)wins.count,
                           hit == NSNotFound ? @"-" : NSStringFromClass([wins[hit] class]), axSpeed, axLimit,
                           (axDesc ?: firstDesc) ?: @"(khong co phan tu)");
+        if (axLimit < 0) axLimit = SPPScanLimitImages(wins);   // bien dang anh
+        if (doLog && axLimit < 0) SPPLogScreenDump(wins);
         SPPNoteScan(axSpeed, axLimit);
         return;
     }
@@ -588,11 +695,12 @@ static void SPPScanSpeed(BOOL doLog)
     if (speed > 300) speed = -1;
     if (limit > 200 || limit < 5) limit = -1;
 
+    if (limit < 0) limit = SPPScanLimitImages(wins);   // bien dang anh (vd GOFA)
     SPPNoteScan(speed, limit);
     // Da tung thay view gioi han ma lan nay khong thay so -> duong hien tai khong co bien
     if (limit < 0 && sLimitView && !limitL) { sScanLimit = -1; sScanLimitAt = CFAbsoluteTimeGetCurrent(); }
     if (doLog) SPPLog("speed scan: toc do=%d gioi han=%d; ung vien:%@", speed, limit, desc);
-    if (doLog && limit < 0) SPPLog("speed scan: chua thay gioi han; view lien quan:%@", SPPDescribeNamedViews(win));
+    if (doLog && limit < 0) SPPLogScreenDump(wins);
 }
 
 // Nhip quet man hinh 0.5s: lay gioi han (va toc do du phong khi khong co GPS)

@@ -8,6 +8,11 @@
 @interface SPPRootListController : PSListController
 @end
 
+// Co trong Preferences.framework nhung header cua Theos khong khai bao
+@interface PSSpecifier (SPPPrivate)
+- (void)setValues:(NSArray *)values titles:(NSArray *)titles shortTitles:(NSArray *)shortTitles;
+@end
+
 // ---------------------------------------------------------------------
 //  Ngon ngu: Language = 0 tu dong (theo may), 1 Tieng Viet, 2 English
 // ---------------------------------------------------------------------
