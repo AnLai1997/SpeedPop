@@ -23,7 +23,7 @@ Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_N
 | Kéo | Di chuyển bong bóng (nhớ vị trí riêng cho iPhone / xe) |
 | 2 ngón | Phóng to / thu nhỏ (nhớ lại) |
 | Chạm | Mở lại app đang cấp tốc độ (trên xe: giao diện CarPlay của app) |
-| Giữ 3 giây | Viền đỏ chạy quanh bong bóng, chạy hết vòng thì thoát hẳn app đó (thả tay sớm để huỷ) |
+| Giữ 2 giây | Viền đỏ chạy quanh bong bóng, chạy hết vòng thì thoát hẳn app đó (thả tay sớm để huỷ) |
 
 Cài đặt > SpeedPop (Tiếng Việt / English, mặc định theo ngôn ngữ máy):
 
