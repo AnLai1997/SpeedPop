@@ -298,6 +298,7 @@ static int sScanSpeed = -1, sScanLimit = -1;
 static CFAbsoluteTime sScanSpeedAt = 0, sScanLimitAt = 0;
 
 #define SPP_GPS_FRESH    3.0    // giay: vi tri cu hon -> coi nhu khong co GPS
+#define SPP_GPS_GRACE   20.0    // giay: app tat GPS bao lau thi moi tat GPS rieng
 #define SPP_SCAN_FRESH   2.0    // giay: toc do quet duoc cu hon -> bo
 #define SPP_LIMIT_FRESH 15.0    // giay: giu bien gioi han sau lan cuoi thay tren man hinh
 
@@ -323,6 +324,8 @@ static int SPPSpeedFromFix(CLLocation *fix, double *outAge)
 @property (nonatomic, strong) CLLocation *last;
 @property (nonatomic, strong) NSHashTable *appManagers;   // manager cua app dang chay (chi dung tren luong chinh)
 @property (nonatomic) BOOL loggedFirst;
+@property (nonatomic) NSUInteger stopToken;   // lenh tat GPS rieng dang cho (scheduleStop)
+@property (nonatomic) BOOL stopPending;
 + (instancetype)shared;
 - (void)appManager:(CLLocationManager *)m running:(BOOL)running;
 @end
@@ -342,8 +345,22 @@ static int SPPSpeedFromFix(CLLocation *fix, double *outAge)
     if (!self.appManagers) self.appManagers = [NSHashTable weakObjectsHashTable];
     if (running) [self.appManagers addObject:m]; else [self.appManagers removeObject:m];
     BOOL active = self.appManagers.allObjects.count > 0;
-    if (active && !self.mgr) [self start];
-    else if (!active && self.mgr) [self stop];
+    if (active) {
+        self.stopToken++; self.stopPending = NO;   // huy lenh tat dang cho
+        if (!self.mgr) [self start];
+    } else if (self.mgr) [self scheduleStop];
+}
+
+// App tat GPS: nhieu app (vd GOFA) tat / bat lai GPS lien tuc -> cho SPP_GPS_GRACE giay, van tat thi moi tat GPS rieng
+- (void)scheduleStop
+{
+    NSUInteger token = ++self.stopToken;
+    self.stopPending = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(SPP_GPS_GRACE * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (token != self.stopToken || !self.mgr) return;
+        self.stopPending = NO;
+        if (self.appManagers.allObjects.count == 0) [self stop];
+    });
 }
 
 - (void)start
@@ -379,8 +396,8 @@ static int SPPSpeedFromFix(CLLocation *fix, double *outAge)
 {
     CLLocation *fix = locations.lastObject;
     if (!fix || manager != self.mgr) return;
-    // Manager cua app bi huy ma khong goi stop -> tat GPS rieng
-    if (self.appManagers.allObjects.count == 0) { [self stop]; return; }
+    // Manager cua app bi huy ma khong goi stop -> hen tat (van dung vi tri nay)
+    if (self.appManagers.allObjects.count == 0 && !self.stopPending) [self scheduleStop];
     self.last = fix;
     int kmh = SPPSpeedFromFix(fix, NULL);
     if (!self.loggedFirst) {
@@ -716,7 +733,10 @@ static void SPPSpeedTick(void)
     int gps = SPPGPSSpeed(&age);
     int scan = (now - sScanSpeedAt) < SPP_SCAN_FRESH ? sScanSpeed : -1;
     int limit = SPPCurrentLimit();
-    if (gps < 0 && scan >= 0) SPPSendSpeed(scan, limit);   // co GPS thi nhip GPS da gui
+    // Gui moi nhip (khong cho ban tin GPS): gioi han vua doi tren man hinh len bong bong ngay, va SpringBoard
+    // khong bi het han du lieu khi GPS cham / app tat-bat GPS (bong bong khong chop tat)
+    if (gps >= 0) SPPSendSpeed(gps, limit);
+    else if (scan >= 0) SPPSendSpeed(scan, limit);
     if (doLog) SPPLog("speed: gps=%d (vi tri cach %.1fs, GPS rieng %@) quet=%d gioi han=%d -> gui %d", gps, age,
                       [SPPSpeedGPS shared].mgr ? @"bat" : @"tat", scan, limit, gps >= 0 ? gps : scan);
 }
