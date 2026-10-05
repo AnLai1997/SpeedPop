@@ -779,15 +779,9 @@ typedef NS_ENUM(NSInteger, SPPStyle) {
     return g;
 }
 
-static UIBezierPath *SPPCircle(CGPoint c, CGFloat r) { return [UIBezierPath bezierPathWithArcCenter:c radius:r startAngle:0 endAngle:2 * M_PI clockwise:YES]; }
 static UIBezierPath *SPPArc(CGPoint c, CGFloat r, CGFloat deg0, CGFloat deg1)
 {
     return [UIBezierPath bezierPathWithArcCenter:c radius:r startAngle:deg0 * M_PI / 180 endAngle:deg1 * M_PI / 180 clockwise:YES];
-}
-static void SPPCirclePart(CALayer *l, CGPoint c, CGFloat r)
-{
-    l.frame = CGRectMake(c.x - r, c.y - r, 2 * r, 2 * r);
-    l.cornerRadius = r;
 }
 
 // Vuot gioi han (moi kieu): nen / quang do nhay, bien gioi han dap theo nhip
