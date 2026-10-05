@@ -20,7 +20,7 @@
         if ([line isKindOfClass:[NSString class]]) SPPLogAppendRelayed(line);
     }];
 
-    int tokSpeed = 0, tokDemo = 0, tokPrefs = 0;
+    int tokSpeed = 0, tokDemo = 0, tokPrefs = 0, tokReset = 0;
     // App dan duong gui toc do + gioi han (kem chi so app); app bi tat trong Cai dat -> bo qua
     notify_register_dispatch(SPP_DARWIN_SPEED, &tokSpeed, dispatch_get_main_queue(), ^(int t) {
         uint64_t state = 0; notify_get_state(t, &state);
@@ -31,6 +31,7 @@
                           appForeground:(flags & 4) != 0 app:app];
     });
     notify_register_dispatch(SPP_DARWIN_DEMO, &tokDemo, dispatch_get_main_queue(), ^(int t) { [[SPPBubble shared] runDemo]; });
+    notify_register_dispatch(SPP_DARWIN_RESET, &tokReset, dispatch_get_main_queue(), ^(int t) { [[SPPBubble shared] resetLayout]; });
     // Doi kieu / bat tat trong Cai dat -> ve lai ngay
     notify_register_dispatch(SPP_DARWIN_PREFS, &tokPrefs, dispatch_get_main_queue(), ^(int t) { [[SPPBubble shared] refresh]; });
 

@@ -10,5 +10,6 @@
 - (void)updateSpeed:(int)speed limit:(int)limit appForeground:(BOOL)fg app:(int)app;   // app: chi so SPP_NAV_APPS
 - (void)refresh;                                    // tinh lai hien/an
 - (void)hide;
+- (void)resetLayout;                                // Cai dat > Dat lai vi tri & kich thuoc
 - (void)runDemo;                                    // Cai dat > Xem thu: toc do gia 10 giay
 @end
