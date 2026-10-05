@@ -947,7 +947,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         self.unitLabel.font = SPPUnitFont(ch * 0.26);
         CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, ch)].width);
         CGFloat uw = ceil([self.unitLabel sizeThatFits:CGSizeMake(200, ch)].width);
-        CGFloat cw = (showIcon ? 4 + ic + 7 : 12) + nw + 3 + uw + 12;
+        CGFloat cw = (showIcon ? 4 + ic + 7 : 12) + nw + 14;   // khong hien km/h
         CGFloat x = hasLimit ? sd - 28 : 0, y = hasLimit ? sd - 24 : 0;
         if (hasLimit) SPPPlace(self.sign, sd / 2, sd / 2, sd);
         self.glass.frame = CGRectMake(x, y, cw, ch); self.glass.corner = ch / 2;
@@ -981,7 +981,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
     }
     case 4: {   // Thanh HUD
         CGFloat h = 52, x = showIcon ? 5 + 42 + 9 : 16, sg = 46;
-        CGFloat sx = x + 54 + 4 + 30 + 8;
+        CGFloat sx = x + 54 + 10;   // khong hien km/h
         size = CGSizeMake(hasLimit ? sx + 8 + sg + 3 : sx, h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = h / 2;
         self.glow.frame = CGRectMake(0, 0, 110, h);
@@ -1065,7 +1065,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
     }
     case 9: {   // Thanh do
         CGFloat h = 74, x = showIcon ? 10 + 40 + 10 : 14, mid = 29;
-        size = CGSizeMake(x + 78 + (hasLimit ? 8 + 54 + 8 : 10), h);
+        size = CGSizeMake(x + 66 + (hasLimit ? 8 + 54 + 8 : 10), h);   // khong hien km/h
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = 18;
         SPPPlace(self.iconView, 10 + 20, mid, 40);
         CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 44)].width);
@@ -1267,19 +1267,19 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
     }
     case 17: {  // Live View
         CGFloat h = 52, x = showIcon ? 5 + 42 + 9 : 16, mid = 23, sg = 46;
-        size = CGSizeMake(x + 84 + (hasLimit ? 6 + sg + 3 : 10), h);
+        size = CGSizeMake(x + 62 + (hasLimit ? 6 + sg + 3 : 10), h);   // khong hien km/h
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = h / 2;
         SPPPlace(self.iconView, 5 + 21, h / 2, 42);
         CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 36)].width);
         self.speedLabel.frame = CGRectMake(x, mid - 18, nw, 36);
         SPPAlignUnit(self.unitLabel, self.speedLabel, x + nw + 3, mid, 34);
         CGFloat maxV = hasLimit ? self.limit * 1.3 : 140;
-        self.meterTrack.frame = CGRectMake(x, h - 11, 76, 3);
+        self.meterTrack.frame = CGRectMake(x, h - 11, 56, 3);
         self.meterTrack.layer.cornerRadius = 1.5; self.meterFill.layer.cornerRadius = 1.5;
         self.meterFill.backgroundColor = sc;
         [CATransaction setDisableActions:NO];
         [UIView animateWithDuration:0.35 animations:^{
-            self.meterFill.frame = CGRectMake(x, h - 11, MAX(3, 76 * MIN(1.0, self.speed / maxV)), 3);
+            self.meterFill.frame = CGRectMake(x, h - 11, MAX(3, 56 * MIN(1.0, self.speed / maxV)), 3);
         }];
         [CATransaction setDisableActions:YES];
         SPPPlace(self.sign, size.width - 3 - sg / 2, h / 2, sg);
@@ -1300,6 +1300,15 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         break;
     }
     }
+    // Khong hien don vi km/h (kieu Vong kep van dung nhan nay cho so gioi han mau do)
+    BOOL unitIsLimit = (self.builtStyle == 16 && hasLimit);
+    if (!unitIsLimit && self.builtStyle != 15) {
+        CGRect sf = self.speedLabel.frame, uf = self.unitLabel.frame;
+        if (CGRectGetMinY(uf) >= CGRectGetMaxY(sf) - 6)
+            self.speedLabel.center = CGPointMake(self.speedLabel.center.x, CGRectGetMidY(CGRectUnion(sf, uf)));
+    }
+    self.unitLabel.hidden = !unitIsLimit;
+
     // Vung nhay: quang tron quanh hinh chinh, hoac phu kin nen
     if (halo) {
         CGRect hr = CGRectInset(halo.frame, -6, -6);
