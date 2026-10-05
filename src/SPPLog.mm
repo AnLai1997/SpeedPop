@@ -1,7 +1,7 @@
 #import "common.h"
 
-// Log: NSLog + ghi file /var/mobile/Documents/CSBubble.log (xem bang Filza)
-static NSString *const kLogPath = @"/var/mobile/Documents/CSBubble.log";
+// Log: NSLog + ghi file /var/mobile/Documents/CarSpeed.log (xem bang Filza)
+static NSString *const kLogPath = @"/var/mobile/Documents/CarSpeed.log";
 
 // Ghi 1 dong vao file; tra ve NO neu khong duoc (sandbox)
 static BOOL SPPAppendLine(NSString *path, NSString *line)
