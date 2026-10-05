@@ -84,7 +84,7 @@ function Resize($src, [int]$n, [string]$path) {
     $gg.DrawImage($src, 0, 0, $n, $n); $gg.Dispose()
     $b.Save($path, [System.Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
 }
-Resize $bmp 256 (Join-Path $Out 'LimitBubble.png')
+Resize $bmp 256 (Join-Path $Out 'CarSpeedBubble.png')
 Resize $bmp 29 (Join-Path $Out 'icon.png')
 Resize $bmp 58 (Join-Path $Out 'icon@2x.png')
 Resize $bmp 87 (Join-Path $Out 'icon@3x.png')

@@ -2,8 +2,8 @@
 #import <Preferences/PSSpecifier.h>
 #import <notify.h>
 
-#define SPP_DOMAIN      @"limitbubble"
-#define SPP_PREFS_NOTIF @"limitbubble.prefschanged"
+#define SPP_DOMAIN      @"carspeedbubble"
+#define SPP_PREFS_NOTIF @"carspeedbubble.prefschanged"
 
 @interface SPPRootListController : PSListController
 @end
@@ -70,7 +70,7 @@ static NSString *L(NSString *key)
             @"sources":        @[@"NGUỒN TỐC ĐỘ", @"SPEED SOURCES"],
             @"sources.footer": @[@"Icon trên bong bóng cho biết tốc độ đang lấy từ app nào. Chạy cả hai app: bong bóng theo app đang chạy nền. Lần đầu cài, mở lại app dẫn đường để tweak được nạp.",
                                  @"The icon on the bubble shows which app the speed comes from. With both apps running, the bubble follows the one in the background. After the first install, relaunch the navigation app so the tweak loads."],
-            @"about":          @[@"LimitBubble %@ · anlai\nLog: /var/mobile/Documents/LimitBubble.log", @"LimitBubble %@ · anlai\nLog: /var/mobile/Documents/LimitBubble.log"],
+            @"about":          @[@"CarSpeedBubble %@ · anlai\nLog: /var/mobile/Documents/CarSpeedBubble.log", @"CarSpeedBubble %@ · anlai\nLog: /var/mobile/Documents/CarSpeedBubble.log"],
         };
     });
     NSArray<NSString *> *pair = t[key];
@@ -92,7 +92,7 @@ static NSString *L(NSString *key)
     return g;
 }
 
-// O cai dat luu vao domain limitbubble, bao SpringBoard ve lai ngay
+// O cai dat luu vao domain carspeedbubble, bao SpringBoard ve lai ngay
 - (PSSpecifier *)pref:(NSString *)name key:(NSString *)key cell:(PSCellType)cell default:(id)def
 {
     PSSpecifier *s = [PSSpecifier preferenceSpecifierNamed:name target:self set:@selector(setPreferenceValue:specifier:)
@@ -188,7 +188,7 @@ static NSString *L(NSString *key)
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.title = @"LimitBubble";
+    self.title = @"CarSpeedBubble";
     [self updateHeader];
 }
 
@@ -199,7 +199,7 @@ static NSString *L(NSString *key)
     CGFloat w = table.bounds.size.width ?: [UIScreen mainScreen].bounds.size.width;
     UIView *h = [[UIView alloc] initWithFrame:CGRectMake(0, 0, w, 168)];
 
-    UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"LimitBubble" inBundle:[NSBundle bundleForClass:[self class]]
+    UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CarSpeedBubble" inBundle:[NSBundle bundleForClass:[self class]]
                                                 compatibleWithTraitCollection:nil]];
     icon.frame = CGRectMake((w - 72) / 2, 18, 72, 72);
     icon.layer.cornerRadius = 16;
@@ -209,7 +209,7 @@ static NSString *L(NSString *key)
     [h addSubview:icon];
 
     UILabel *name = [[UILabel alloc] initWithFrame:CGRectMake(16, 98, w - 32, 30)];
-    name.text = @"LimitBubble";
+    name.text = @"CarSpeedBubble";
     name.font = [UIFont systemFontOfSize:26 weight:UIFontWeightBold];
     name.textAlignment = NSTextAlignmentCenter;
     name.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -232,12 +232,12 @@ static NSString *L(NSString *key)
 // ---------------------------------------------------------------------
 - (void)bubbleDemo
 {
-    notify_post("limitbubble.demo");
+    notify_post("carspeedbubble.demo");
 }
 
 - (void)resetLayout
 {
-    notify_post("limitbubble.resetlayout");
+    notify_post("carspeedbubble.resetlayout");
     // SpringBoard ghi lai kich thuoc 100 -> doc lai de thanh truot cap nhat
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         CFPreferencesAppSynchronize((__bridge CFStringRef)SPP_DOMAIN);
