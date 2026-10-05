@@ -300,7 +300,8 @@ static CFAbsoluteTime sScanSpeedAt = 0, sScanLimitAt = 0;
 #define SPP_GPS_FRESH    3.0    // giay: vi tri cu hon -> coi nhu khong co GPS
 #define SPP_GPS_GRACE   20.0    // giay: app tat GPS bao lau thi moi tat GPS rieng
 #define SPP_SCAN_FRESH   2.0    // giay: toc do quet duoc cu hon -> bo
-#define SPP_LIMIT_FRESH 15.0    // giay: giu bien gioi han sau lan cuoi thay tren man hinh
+#define SPP_LIMIT_FRESH  2.0    // giay: bien bien mat khoi man hinh app bao lau thi bo (chong chop khi 1 lan quet truot)
+#define SPP_TICK         0.3    // giay: nhip quet man hinh + gui toc do / gioi han sang SpringBoard
 
 static int SPPCurrentLimit(void)
 {
@@ -443,7 +444,7 @@ static void SPPAppGPSChanged(CLLocationManager *m, BOOL running)
 %end // NAVAPP
 
 // ---------------------------------------------------------------------
-//  Quet man hinh moi 0.5s
+//  Quet man hinh moi SPP_TICK giay
 // ---------------------------------------------------------------------
 static void SPPNoteScan(int speed, int limit)
 {
@@ -720,7 +721,7 @@ static void SPPScanSpeed(BOOL doLog)
     if (doLog && limit < 0) SPPLogScreenDump(wins);
 }
 
-// Nhip quet man hinh 0.5s: lay gioi han (va toc do du phong khi khong co GPS)
+// Nhip quet man hinh (SPP_TICK): lay gioi han (va toc do du phong khi khong co GPS)
 static void SPPSpeedTick(void)
 {
     static CFAbsoluteTime lastLog = 0;
@@ -752,6 +753,6 @@ static void SPPSpeedTick(void)
     SPPWatchForeground();
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         SPPLog("speed scan: bat dau");
-        [NSTimer scheduledTimerWithTimeInterval:0.5 repeats:YES block:^(NSTimer *t) { SPPSpeedTick(); }];
+        [NSTimer scheduledTimerWithTimeInterval:SPP_TICK repeats:YES block:^(NSTimer *t) { SPPSpeedTick(); }];
     });
 }
