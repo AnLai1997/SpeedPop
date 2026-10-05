@@ -3,7 +3,7 @@
 #import <notify.h>
 
 #define SPP_SPEED_STALE 5.0   // giay khong co du lieu moi -> an bong bong
-#define SPP_SCALE_BASE  0.7   // ti le ung voi 100% trong Cai dat (Kich thuoc tren iPhone / CarPlay)
+#define SPP_SCALE_BASE  0.9   // ti le ung voi 100% trong Cai dat (Kich thuoc tren iPhone / CarPlay)
 #define SPP_SIZE_MIN    60.0  // % (Cai dat + chum 2 ngon)
 #define SPP_SIZE_MAX    220.0
 #define SPP_HOLD_QUIT   2.0   // giay giu bong bong de thoat han app
@@ -780,6 +780,9 @@ static BOOL sSeenRunning[8];
         break;
     }
     }
+    // Co so toc do theo kieu: du lon de doc khi lai xe (o 100% ~ 26..43pt tren man)
+    static const CGFloat kSpeedFont[SPP_STYLE_COUNT] = {34, 32, 29, 36, 32, 34, 36, 32, 38, 34, 46, 34, 28, 26, 48, 26, 28, 30};
+    self.speedLabel.font = SPPNumFont(kSpeedFont[style]);
     self.unitLabel.text = (style == 8) ? @"KM/H" : @"km/h";
     [card addSubview:self.speedLabel];
     [card addSubview:self.unitLabel];
@@ -924,28 +927,28 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
     UIView *halo = nil;   // hinh chinh de ve quang do nhay xung quanh (nil = nhay trong nen)
     switch (self.builtStyle) {
     case 1: {   // Dia nho: logo o vi tri 12 gio, so o giua
-        CGFloat d = 80, r = d / 2, sg = 58;
+        CGFloat d = 80, r = d / 2, sg = 62;
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
         self.stateRing.path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(3, 3, d - 6, d - 6)].CGPath;
         self.stateRing.strokeColor = sc.CGColor;
         CGFloat dy = showIcon ? 0 : -7;
         SPPPlace(self.iconView, r, 19, 20);
-        self.speedLabel.frame = CGRectMake(9, 30 + dy, d - 18, 30);
-        self.unitLabel.frame = CGRectMake(9, 57 + dy, d - 18, 12);
+        self.speedLabel.frame = CGRectMake(6, 28 + dy, d - 12, 36);
+        self.unitLabel.frame = CGRectMake(9, 61 + dy, d - 18, 12);
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
         break;
     }
     case 2: {   // Bien bao
-        CGFloat sd = 72, ch = hasLimit ? 46 : 48;
+        CGFloat sd = 78, ch = 52;
         CGFloat ic = showIcon ? ch - 8 : 0;
         self.speedLabel.font = SPPNumFont(ch * 0.56);
         self.unitLabel.font = SPPUnitFont(ch * 0.26);
         CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, ch)].width);
         CGFloat uw = ceil([self.unitLabel sizeThatFits:CGSizeMake(200, ch)].width);
         CGFloat cw = (showIcon ? 4 + ic + 7 : 12) + nw + 3 + uw + 12;
-        CGFloat x = hasLimit ? sd - 26 : 0, y = hasLimit ? sd - 22 : 0;
+        CGFloat x = hasLimit ? sd - 28 : 0, y = hasLimit ? sd - 24 : 0;
         if (hasLimit) SPPPlace(self.sign, sd / 2, sd / 2, sd);
         self.glass.frame = CGRectMake(x, y, cw, ch); self.glass.corner = ch / 2;
         if (showIcon) SPPPlace(self.iconView, x + 4 + ic / 2, y + ch / 2, ic);
@@ -957,7 +960,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         break;
     }
     case 3: {   // Dong ho
-        CGFloat d = 108, r = d / 2, sg = 76;
+        CGFloat d = 108, r = d / 2, sg = 80;
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
         UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(r, r) radius:r - 11
@@ -969,30 +972,30 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [CATransaction setDisableActions:NO]; [CATransaction setAnimationDuration:0.4];
         self.gaugeArc.strokeEnd = MIN(1.0, MAX(0.0, self.speed / maxV));
         [CATransaction setDisableActions:YES];
-        self.speedLabel.frame = CGRectMake(16, 31, d - 32, 38);
-        self.unitLabel.frame = CGRectMake(16, 64, d - 32, 12);
+        self.speedLabel.frame = CGRectMake(12, 28, d - 24, 44);
+        self.unitLabel.frame = CGRectMake(16, 68, d - 32, 12);
         SPPPlace(self.iconView, r, d - 15, 24);
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
         break;
     }
     case 4: {   // Thanh HUD
-        CGFloat h = 48, x = showIcon ? 5 + 38 + 9 : 16, sg = 40;
-        CGFloat sx = x + 44 + 4 + 30 + 8;
-        size = CGSizeMake(hasLimit ? sx + 8 + sg + 4 : x + 44 + 4 + 30 + 8, h);
+        CGFloat h = 52, x = showIcon ? 5 + 42 + 9 : 16, sg = 46;
+        CGFloat sx = x + 54 + 4 + 30 + 8;
+        size = CGSizeMake(hasLimit ? sx + 8 + sg + 3 : sx, h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = h / 2;
         self.glow.frame = CGRectMake(0, 0, 110, h);
         self.glow.colors = @[(id)[sc colorWithAlphaComponent:0.34].CGColor, (id)[sc colorWithAlphaComponent:0].CGColor];
-        SPPPlace(self.iconView, 5 + 19, h / 2, 38);
-        self.speedLabel.frame = CGRectMake(x, 5, 44, h - 10);
-        SPPAlignUnit(self.unitLabel, self.speedLabel, x + 48, h / 2, 30);
+        SPPPlace(self.iconView, 5 + 21, h / 2, 42);
+        self.speedLabel.frame = CGRectMake(x, 4, 54, h - 8);
+        SPPAlignUnit(self.unitLabel, self.speedLabel, x + 58, h / 2, 30);
         self.separator.hidden = !hasLimit;
         self.separator.frame = CGRectMake(sx, 12, 1, h - 24);
         SPPPlace(self.sign, sx + 8 + sg / 2, h / 2, sg);
         break;
     }
     case 5: {   // Mau toc do: icon nho ben trong, tren so
-        CGFloat d = 86, r = d / 2, sg = 62;
+        CGFloat d = 86, r = d / 2, sg = 66;
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
         CGFloat hh, ss, bb, aa;
@@ -1004,30 +1007,30 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [self.glass setTop:top bottom:bottom];
         CGFloat dy = showIcon ? 0 : -7;
         SPPPlace(self.iconView, r, 19, 20);
-        self.speedLabel.frame = CGRectMake(10, 31 + dy, d - 20, 34);
-        self.unitLabel.frame = CGRectMake(10, 62 + dy, d - 20, 12);
+        self.speedLabel.frame = CGRectMake(7, 29 + dy, d - 14, 40);
+        self.unitLabel.frame = CGRectMake(10, 66 + dy, d - 20, 12);
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
         break;
     }
     case 6: {   // Cot doc
-        CGFloat w = 68, tileH = 60, top = showIcon ? tileH + 8 : 12;
-        CGFloat y2 = top + 34 + 12;
-        size = CGSizeMake(w, hasLimit ? y2 + 8 + 54 + 7 : y2 + 2);
+        CGFloat w = 74, tileH = 62, top = showIcon ? tileH + 8 : 12;
+        CGFloat y2 = top + 40 + 12;
+        size = CGSizeMake(w, hasLimit ? y2 + 8 + 60 + 7 : y2 + 2);
         self.glass.frame = CGRectMake(0, 0, w, size.height); self.glass.corner = 22;
         self.iconView.tileCorner = 22;
         self.iconView.tileMask = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
         SPPPlaceRect(self.iconView, CGRectMake(0, 0, w, tileH));
-        self.speedLabel.frame = CGRectMake(5, top - 2, w - 10, 34);
-        self.unitLabel.frame = CGRectMake(5, top + 31, w - 10, 13);
+        self.speedLabel.frame = CGRectMake(4, top - 3, w - 8, 42);
+        self.unitLabel.frame = CGRectMake(5, top + 36, w - 10, 13);
         self.separator.hidden = !hasLimit;
         self.separator.frame = CGRectMake(14, y2, w - 28, 1);
-        SPPPlace(self.sign, w / 2, y2 + 8 + 27, 54);
+        SPPPlace(self.sign, w / 2, y2 + 8 + 30, 60);
         break;
     }
     case 7: {   // Vien thuoc doi
-        CGFloat h = 54, x = showIcon ? 6 + 42 + 8 : 14;
-        CGFloat lw = x + 50 + 12, rw = hasLimit ? 62 : 0;
+        CGFloat h = 58, x = showIcon ? 6 + 46 + 8 : 14;
+        CGFloat lw = x + 58 + 12, rw = hasLimit ? 68 : 0;
         size = CGSizeMake(lw + rw, h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = h / 2;
         CGFloat hh, ss, bb, aa;
@@ -1039,36 +1042,36 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [self.glass setTop:top bottom:bottom];
         self.panel.hidden = !hasLimit;
         self.panel.frame = CGRectMake(lw, 0, rw, h);
-        SPPPlace(self.iconView, 6 + 21, h / 2, 42);
-        self.speedLabel.frame = CGRectMake(x, 6, 50, 31);
-        self.unitLabel.frame = CGRectMake(x, 36, 50, 12);
-        SPPPlace(self.sign, lw + rw / 2 - 3, h / 2, 46);
+        SPPPlace(self.iconView, 6 + 23, h / 2, 46);
+        self.speedLabel.frame = CGRectMake(x, 4, 58, 38);
+        self.unitLabel.frame = CGRectMake(x, 41, 58, 12);
+        SPPPlace(self.sign, lw + rw / 2 - 3, h / 2, 52);
         break;
     }
     case 8: {   // Neon
-        CGFloat h = 58, x = showIcon ? 9 + 34 + 10 : 12;
-        size = CGSizeMake(x + 62 + (hasLimit ? 6 + 48 + 5 : 12), h);
+        CGFloat h = 62, x = showIcon ? 9 + 36 + 10 : 12;
+        size = CGSizeMake(x + 72 + (hasLimit ? 6 + 54 + 5 : 12), h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = 18;
         self.iconView.layer.shadowColor = sc.CGColor;
         self.iconView.layer.shadowRadius = 6; self.iconView.layer.shadowOpacity = 0.95; self.iconView.layer.shadowOffset = CGSizeZero;
         self.glass.fill.borderColor = [sc colorWithAlphaComponent:0.8].CGColor;
         self.speedLabel.layer.shadowColor = sc.CGColor;
         self.unitLabel.textColor = sc;
-        SPPPlace(self.iconView, 9 + 17, h / 2, 34);
-        self.speedLabel.frame = CGRectMake(x, 6, 62, 38);
-        self.unitLabel.frame = CGRectMake(x, h - 15, 62, 11);
-        SPPPlace(self.sign, size.width - 5 - 24, h / 2, 48);
+        SPPPlace(self.iconView, 9 + 18, h / 2, 36);
+        self.speedLabel.frame = CGRectMake(x, 4, 72, 44);
+        self.unitLabel.frame = CGRectMake(x, h - 15, 72, 11);
+        SPPPlace(self.sign, size.width - 5 - 27, h / 2, 54);
         break;
     }
     case 9: {   // Thanh do
-        CGFloat h = 70, x = showIcon ? 10 + 36 + 10 : 14, mid = 27;
-        size = CGSizeMake(x + 70 + (hasLimit ? 8 + 48 + 8 : 10), h);
+        CGFloat h = 74, x = showIcon ? 10 + 40 + 10 : 14, mid = 29;
+        size = CGSizeMake(x + 78 + (hasLimit ? 8 + 54 + 8 : 10), h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = 18;
-        SPPPlace(self.iconView, 10 + 18, mid, 36);
-        CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 40)].width);
-        self.speedLabel.frame = CGRectMake(x, mid - 19, nw, 38);
+        SPPPlace(self.iconView, 10 + 20, mid, 40);
+        CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 44)].width);
+        self.speedLabel.frame = CGRectMake(x, mid - 21, nw, 42);
         SPPAlignUnit(self.unitLabel, self.speedLabel, x + nw + 3, mid, 34);
-        SPPPlace(self.sign, size.width - 8 - 24, mid + 1, 48);
+        SPPPlace(self.sign, size.width - 8 - 27, mid + 1, 54);
         CGFloat bx = 12, bw = size.width - 24, by = h - 16;
         CGFloat maxV = hasLimit ? self.limit * 1.3 : 140;
         self.meterTrack.frame = CGRectMake(bx, by, bw, 6);
@@ -1086,18 +1089,18 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         break;
     }
     case 10: {  // Chu noi
-        CGFloat nw = 64;
-        size = CGSizeMake(hasLimit ? nw + 8 + 52 : nw, 68);
-        SPPPlace(self.iconView, 13, 58, 18);
-        self.speedLabel.frame = CGRectMake(0, 2, nw, 48);
-        self.unitLabel.frame = showIcon ? CGRectMake(26, 51, 40, 14) : CGRectMake(8, 51, 50, 14);
+        CGFloat nw = 76;
+        size = CGSizeMake(hasLimit ? nw + 8 + 58 : nw, 76);
+        SPPPlace(self.iconView, 13, 65, 18);
+        self.speedLabel.frame = CGRectMake(0, 0, nw, 56);
+        self.unitLabel.frame = showIcon ? CGRectMake(26, 58, 46, 14) : CGRectMake(8, 58, 60, 14);
         self.unitLabel.textAlignment = showIcon ? NSTextAlignmentLeft : NSTextAlignmentCenter;
-        SPPPlace(self.sign, nw + 8 + 26, 32, 52);
+        SPPPlace(self.sign, nw + 8 + 29, 34, 58);
         halo = self.speedLabel;
         break;
     }
     case 12: {  // Vo lang
-        CGFloat d = 112, r = d / 2, sg = 76; CGPoint m = CGPointMake(r, r);
+        CGFloat d = 112, r = d / 2, sg = 80; CGPoint m = CGPointMake(r, r);
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
         self.deco.frame = self.glass.frame;
@@ -1113,15 +1116,15 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [sp appendPath:[UIBezierPath bezierPathWithRoundedRect:CGRectMake(r - 7, r + 27, 14, 16) cornerRadius:4]];
         ((CAShapeLayer *)self.parts[@"spokes"]).path = sp.CGPath;
         SPPCirclePart(self.parts[@"hub"], m, 30);
-        self.speedLabel.frame = CGRectMake(r - 30, r - 19, 60, 30);
-        self.unitLabel.frame = CGRectMake(r - 30, r + 9, 60, 11);
+        self.speedLabel.frame = CGRectMake(r - 30, r - 21, 60, 34);
+        self.unitLabel.frame = CGRectMake(r - 30, r + 11, 60, 11);
         SPPPlace(self.iconView, r, r + 40, 20);
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
         break;
     }
     case 13: {  // Banh xe
-        CGFloat d = 112, r = d / 2, sg = 76; CGPoint m = CGPointMake(r, r);
+        CGFloat d = 112, r = d / 2, sg = 80; CGPoint m = CGPointMake(r, r);
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
         self.deco.frame = self.glass.frame;
@@ -1154,14 +1157,14 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [self setSpin:self.speed / 75.0];   // 75 km/h ~ 1 vong/giay
         CGFloat dy = showIcon ? 0 : -6;
         SPPPlace(self.iconView, r, r - 17, 14);
-        self.speedLabel.frame = CGRectMake(r - 28, r - 13 + dy, 56, 26);
-        self.unitLabel.frame = CGRectMake(r - 28, r + 11 + dy, 56, 10);
+        self.speedLabel.frame = CGRectMake(r - 28, r - 15 + dy, 56, 30);
+        self.unitLabel.frame = CGRectMake(r - 28, r + 13 + dy, 56, 10);
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
         break;
     }
     case 14: {  // The HarmonyOS
-        CGFloat w = hasLimit ? 172 : 132, h = 132, sg = 56;
+        CGFloat w = hasLimit ? 186 : 136, h = 132, sg = 62;
         size = CGSizeMake(w, h);
         self.glass.frame = CGRectMake(0, 0, w, h); self.glass.corner = 30;
         UIColor *top = SPPRGB(64, 132, 255, 0.96), *bottom = SPPRGB(10, 89, 247, 0.96);
@@ -1173,7 +1176,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         self.nameLabel.text = SPPNavAppName(self.app);
         self.nameLabel.frame = CGRectMake(nx, 18, w - 14 - nx, 16);
         CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 60)].width);
-        self.speedLabel.frame = CGRectMake(14, 38, nw, 52);
+        self.speedLabel.frame = CGRectMake(14, 36, nw, 56);
         SPPAlignUnit(self.unitLabel, self.speedLabel, 14 + nw + 4, 64, 40);
         CGFloat maxV = hasLimit ? self.limit * 1.3 : 140, bw = w - 28;
         self.meterTrack.frame = CGRectMake(14, 100, bw, 18);
@@ -1187,7 +1190,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         break;
     }
     case 15: {  // Dong ho kim
-        CGFloat d = 112, r = d / 2, R = r - 6, maxV = 160, a0 = 150, a1 = 390, sg = 76;
+        CGFloat d = 112, r = d / 2, R = r - 6, maxV = 160, a0 = 150, a1 = 390, sg = 80;
         CGPoint m = CGPointMake(r, r + 4);
         size = CGSizeMake(hasLimit ? d + 6 + sg : d, d);
         self.glass.frame = CGRectMake(0, 0, d, d); self.glass.corner = r;
@@ -1223,7 +1226,7 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         needle.transform = CATransform3DMakeRotation(ang, 0, 0, 1);
         [CATransaction setDisableActions:YES];
         SPPPlace(self.iconView, m.x, m.y, 20);   // logo lam chot kim
-        self.speedLabel.frame = CGRectMake(r - 30, m.y + 13, 60, 26);
+        self.speedLabel.frame = CGRectMake(r - 32, m.y + 12, 64, 32);
         self.unitLabel.hidden = YES;
         SPPPlace(self.sign, d + 6 + sg / 2, r, sg);
         halo = self.glass;
@@ -1253,9 +1256,9 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         [CATransaction setDisableActions:YES];
         CGFloat dy = showIcon ? 2 : -4;
         SPPPlace(self.iconView, r, r - 18, 16);
-        self.speedLabel.frame = CGRectMake(r - 26, r - 12 + dy, 52, 26);
-        self.unitLabel.frame = hasLimit ? CGRectMake(r - 26, r + 11 + dy, 52, 18) : CGRectMake(r - 26, r + 12 + dy, 52, 11);
-        self.unitLabel.font = hasLimit ? SPPNumFont(16) : SPPUnitFont(9);
+        self.speedLabel.frame = CGRectMake(r - 27, r - 16 + dy, 54, 32);
+        self.unitLabel.frame = hasLimit ? CGRectMake(r - 26, r + 13 + dy, 52, 22) : CGRectMake(r - 26, r + 14 + dy, 52, 11);
+        self.unitLabel.font = hasLimit ? SPPNumFont(20) : SPPUnitFont(9);
         self.unitLabel.text = hasLimit ? [NSString stringWithFormat:@"%d", self.limit] : @"km/h";
         self.unitLabel.textColor = hasLimit ? SPPSignRed() : SPPRGB(60, 60, 67, 0.6);
         self.sign.hidden = YES;   // gioi han da the hien o vong trong + so do
@@ -1263,20 +1266,20 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
         break;
     }
     case 17: {  // Live View
-        CGFloat h = 46, x = showIcon ? 5 + 36 + 9 : 16, mid = 21, sg = 40;
-        size = CGSizeMake(x + 74 + (hasLimit ? 6 + sg + 3 : 10), h);
+        CGFloat h = 52, x = showIcon ? 5 + 42 + 9 : 16, mid = 23, sg = 46;
+        size = CGSizeMake(x + 84 + (hasLimit ? 6 + sg + 3 : 10), h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = h / 2;
-        SPPPlace(self.iconView, 5 + 18, h / 2, 36);
-        CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 30)].width);
-        self.speedLabel.frame = CGRectMake(x, mid - 15, nw, 30);
+        SPPPlace(self.iconView, 5 + 21, h / 2, 42);
+        CGFloat nw = ceil([self.speedLabel sizeThatFits:CGSizeMake(200, 36)].width);
+        self.speedLabel.frame = CGRectMake(x, mid - 18, nw, 36);
         SPPAlignUnit(self.unitLabel, self.speedLabel, x + nw + 3, mid, 34);
         CGFloat maxV = hasLimit ? self.limit * 1.3 : 140;
-        self.meterTrack.frame = CGRectMake(x, h - 10, 66, 3);
+        self.meterTrack.frame = CGRectMake(x, h - 11, 76, 3);
         self.meterTrack.layer.cornerRadius = 1.5; self.meterFill.layer.cornerRadius = 1.5;
         self.meterFill.backgroundColor = sc;
         [CATransaction setDisableActions:NO];
         [UIView animateWithDuration:0.35 animations:^{
-            self.meterFill.frame = CGRectMake(x, h - 10, MAX(3, 66 * MIN(1.0, self.speed / maxV)), 3);
+            self.meterFill.frame = CGRectMake(x, h - 11, MAX(3, 76 * MIN(1.0, self.speed / maxV)), 3);
         }];
         [CATransaction setDisableActions:YES];
         SPPPlace(self.sign, size.width - 3 - sg / 2, h / 2, sg);
@@ -1284,15 +1287,15 @@ static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
     }
     case 11:    // The sang: bo cuc nhu The ngang
     default: {  // 0 The ngang
-        CGFloat h = 56, nw = 58, sg = 48;
+        CGFloat h = 60, nw = 66, sg = 52;
         CGFloat x = showIcon ? h + 8 : 14;
         size = CGSizeMake(x + nw + (hasLimit ? 4 + sg + 4 : 10), h);
         self.glass.frame = CGRectMake(0, 0, size.width, h); self.glass.corner = 18;
         self.iconView.tileCorner = 18;
         self.iconView.tileMask = kCALayerMinXMinYCorner | kCALayerMinXMaxYCorner;
         SPPPlaceRect(self.iconView, CGRectMake(0, 0, h, h));
-        self.speedLabel.frame = CGRectMake(x, 6, nw, 36);
-        self.unitLabel.frame = CGRectMake(x, 38, nw, 13);
+        self.speedLabel.frame = CGRectMake(x, 4, nw, 42);
+        self.unitLabel.frame = CGRectMake(x, 42, nw, 14);
         SPPPlace(self.sign, x + nw + 4 + sg / 2, h / 2, sg);
         break;
     }
