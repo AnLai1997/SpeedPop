@@ -61,6 +61,10 @@ static NSString *L(NSString *key)
             @"showIcon":       @[@"Hiện icon app", @"Show app icon"],
             @"preview":        @[@"Xem thử (10 giây)", @"Preview (10 seconds)"],
             @"reset":          @[@"Đặt lại vị trí & kích thước", @"Reset position & size"],
+            @"size.phone":     @[@"KÍCH THƯỚC TRÊN IPHONE", @"SIZE ON IPHONE"],
+            @"size.car":       @[@"KÍCH THƯỚC TRÊN CARPLAY", @"SIZE ON CARPLAY"],
+            @"size.footer":    @[@"100 = cỡ mặc định (60 – 220). Chụm 2 ngón trên bong bóng cũng đổi cỡ của màn đang dùng và cập nhật ở đây.",
+                                 @"100 = default size (60 – 220). Pinching the bubble also resizes it on the current screen and updates this value."],
             @"appearance.footer": @[@"Kéo để di chuyển · chụm 2 ngón để đổi cỡ · chạm để mở lại app · giữ 2 giây (viền đỏ chạy hết vòng) để thoát hẳn app.",
                                     @"Drag to move · pinch to resize · tap to reopen the app · hold for 2 seconds (until the red ring completes) to quit the app."],
             @"sources":        @[@"NGUỒN TỐC ĐỘ", @"SPEED SOURCES"],
@@ -102,6 +106,18 @@ static NSString *L(NSString *key)
     return s;
 }
 
+// Thanh truot kich thuoc 60..220 %, nhay buoc 10, hien so
+- (PSSpecifier *)sizeSlider:(NSString *)key
+{
+    PSSpecifier *s = [self pref:@"" key:key cell:PSSliderCell default:@100];
+    [s setProperty:@60 forKey:@"min"];
+    [s setProperty:@220 forKey:@"max"];
+    [s setProperty:@YES forKey:@"showValue"];
+    [s setProperty:@YES forKey:@"isSegmented"];
+    [s setProperty:@16 forKey:@"segmentCount"];
+    return s;
+}
+
 - (PSSpecifier *)button:(NSString *)name action:(SEL)action
 {
     PSSpecifier *s = [PSSpecifier preferenceSpecifierNamed:name target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
@@ -132,6 +148,12 @@ static NSString *L(NSString *key)
         [a addObject:style];
         [a addObject:[self pref:L(@"showIcon") key:@"ShowAppIcon" cell:PSSwitchCell default:@YES]];
         [a addObject:[self button:L(@"preview") action:@selector(bubbleDemo)]];
+
+        // Kich thuoc: rieng iPhone / CarPlay (%), buoc 10
+        [a addObject:[self group:L(@"size.phone") footer:nil]];
+        [a addObject:[self sizeSlider:@"SizePhone"]];
+        [a addObject:[self group:L(@"size.car") footer:L(@"size.footer")]];
+        [a addObject:[self sizeSlider:@"SizeCar"]];
         [a addObject:[self button:L(@"reset") action:@selector(resetLayout)]];
 
         // Nguon toc do
@@ -216,6 +238,12 @@ static NSString *L(NSString *key)
 - (void)resetLayout
 {
     notify_post("com.anlai97.speedpop.resetlayout");
+    // SpringBoard ghi lai kich thuoc 100 -> doc lai de thanh truot cap nhat
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CFPreferencesAppSynchronize((__bridge CFStringRef)SPP_DOMAIN);
+        [self reloadSpecifiers];
+        [self updateHeader];
+    });
 }
 
 @end
