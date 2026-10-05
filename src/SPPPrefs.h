@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-#define SPP_PREFS_DOMAIN @"com.anlai97.speedpop"
+#define SPP_PREFS_DOMAIN @"limitbubble"
 
-// Doc cau hinh tu domain com.anlai97.speedpop (Settings ghi qua cfprefsd), doc moi lan -> co hieu luc ngay
+// Doc cau hinh tu domain limitbubble (Settings ghi qua cfprefsd), doc moi lan -> co hieu luc ngay
 @interface SPPPrefs : NSObject
 + (BOOL)enabled;          // bat bong bong
 + (NSInteger)style;       // 0..17, xem danh sach kieu trong SPPBubble.mm
