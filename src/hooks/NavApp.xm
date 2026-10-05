@@ -1,5 +1,6 @@
 #import "../common.h"
 #import <notify.h>
+#import <substrate.h>   // MSHookFunction dung truoc %group dau tien (Logos chen substrate.h muon hon)
 #import <CoreLocation/CoreLocation.h>
 
 // =====================================================================
