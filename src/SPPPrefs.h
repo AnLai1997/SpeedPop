@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-#define SPP_PREFS_DOMAIN @"carspeedbubble"
+#define SPP_PREFS_DOMAIN @"csbubble"
 
-// Doc cau hinh tu domain carspeedbubble (Settings ghi qua cfprefsd), doc moi lan -> co hieu luc ngay
+// Doc cau hinh tu domain csbubble (Settings ghi qua cfprefsd), doc moi lan -> co hieu luc ngay
 @interface SPPPrefs : NSObject
 + (BOOL)enabled;          // bat bong bong
 + (NSInteger)style;       // 0..17, xem danh sach kieu trong SPPBubble.mm

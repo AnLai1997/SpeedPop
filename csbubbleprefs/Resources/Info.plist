@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>CarSpeedBubblePrefs</string>
+	<string>CSBubblePrefs</string>
 	<key>CFBundleIdentifier</key>
-	<string>carspeedbubble.prefs</string>
+	<string>csbubble.prefs</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

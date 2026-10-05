@@ -8,18 +8,18 @@ INSTALL_TARGET_PROCESSES = SpringBoard CarPlay Runner GOFA
 
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = CarSpeedBubble
-CarSpeedBubble_FILES = $(wildcard src/hooks/*.xm) $(wildcard src/*.mm)
-CarSpeedBubble_CFLAGS = -fobjc-arc -Isrc
-CarSpeedBubble_FRAMEWORKS = UIKit QuartzCore CoreLocation
+TWEAK_NAME = CSBubble
+CSBubble_FILES = $(wildcard src/hooks/*.xm) $(wildcard src/*.mm)
+CSBubble_CFLAGS = -fobjc-arc -Isrc
+CSBubble_FRAMEWORKS = UIKit QuartzCore CoreLocation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
-SUBPROJECTS += carspeedbubbleprefs
+SUBPROJECTS += csbubbleprefs
 include $(THEOS_MAKE_PATH)/aggregate.mk
 
 # entry.plist cho PreferenceLoader -> /var/jb/Library/PreferenceLoader/Preferences/
 after-stage::
 	mkdir -p "$(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences"
-	cp carspeedbubbleprefs/entry.plist "$(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/CarSpeedBubblePrefs.plist"
+	cp csbubbleprefs/entry.plist "$(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/CSBubblePrefs.plist"
 	find "$(THEOS_STAGING_DIR)" -type f | sort
