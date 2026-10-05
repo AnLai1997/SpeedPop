@@ -1,6 +1,6 @@
 Package: carspeed
 Name: CarSpeed
-Version: 1.0.0
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Description: Floating speed-limit bubble (current speed + speed limit from Vietmap Live / GOFA) while the navigation app runs in the background - on the CarPlay screen when connected, otherwise on iPhone (Dopamine rootless)
 Author: anlai <laihoangan123456@gmail.com>

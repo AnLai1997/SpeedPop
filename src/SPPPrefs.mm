@@ -17,7 +17,7 @@ static id value(NSString *key)
 }
 
 + (BOOL)enabled    { id v = value(@"Enabled"); return v ? [v boolValue] : YES; }
-+ (NSInteger)style { id v = value(@"Style");   NSInteger i = v ? [v integerValue] : 0; return (i >= 0 && i < 18) ? i : 0; }
++ (NSInteger)style { id v = value(@"Style");   NSInteger i = v ? [v integerValue] : 0; return (i >= 0 && i < 14) ? i : 0; }   // 14 kieu = SPPStyleCount (SPPBubble.mm)
 
 + (BOOL)showAppIcon { id v = value(@"ShowAppIcon"); return v ? [v boolValue] : YES; }
 

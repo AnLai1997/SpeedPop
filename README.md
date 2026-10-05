@@ -25,16 +25,23 @@ Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_N
 | Chạm | Mở lại app đang cấp tốc độ (trên xe: giao diện CarPlay của app) |
 | Giữ 2 giây | Viền đỏ chạy quanh bong bóng, chạy hết vòng thì thoát hẳn app đó (thả tay sớm để huỷ) |
 
-Cài đặt > CarSpeed (Tiếng Việt / English, mặc định theo ngôn ngữ máy):
+Cài đặt > CarSpeed (ngôn ngữ đổi ở nút 🌐 góc phải trên: Tự động / Tiếng Việt / English):
 
 | Nhóm | Mục |
 | --- | --- |
-| Chung | Bật bong bóng · Ngôn ngữ |
-| Giao diện | Kiểu hiển thị · Hiện icon app · Xem thử 10 giây |
+| (đầu trang) | Bật bong bóng |
+| Giao diện | Kiểu hiển thị (màn chọn riêng, chọn là xem thử ngay) · Hiện icon app · Xem thử 10 giây |
 | Kích thước | Trên iPhone · Trên CarPlay (60–220, 100 = mặc định) · Đặt lại vị trí & kích thước |
-| Nguồn tốc độ | Vietmap Live · GOFA |
+| Nguồn tốc độ | Vietmap Live · GOFA (kèm icon app) |
+| Thao tác | Bảng nhắc các thao tác trên bong bóng |
 
-18 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng, và nhóm lấy ý tưởng từ xe hơi theo phong cách HarmonyOS: Vô lăng, Bánh xe (mâm quay theo tốc độ), Thẻ HarmonyOS, Đồng hồ kim, Vòng kép HarmonyOS, Live View.
+14 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ (thứ tự = giá trị `Style` = enum `SPPStyle` trong `src/SPPBubble.mm`):
+
+| Nhóm | Kiểu |
+| --- | --- |
+| Thẻ & viên thuốc | Thẻ · Thẻ sáng · Kính mờ · Viên thuốc đôi · Live View · Cột dọc · Đèn LED |
+| Tròn | Biển báo lớn · Đĩa màu theo tốc độ · Đồng hồ cung · Đồng hồ kim |
+| HarmonyOS | Thẻ HarmonyOS · Vòng kép HarmonyOS · Bán nguyệt HarmonyOS |
 
 Icon: `carspeedprefs/Resources/icon*.png` (Cài đặt), `CarSpeed.png` (icon gói trong Sileo/Zebra), bản gốc `assets/icon-1024.png` — vẽ lại bằng `powershell -File assets/make-icon.ps1 -Out <thư mục>` (Windows, cần font Bahnschrift).
 
