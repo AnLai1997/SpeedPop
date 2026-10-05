@@ -33,7 +33,7 @@ Cài đặt > SpeedPop (Tiếng Việt / English, mặc định theo ngôn ngữ
 | Giao diện | Kiểu hiển thị · Hiện icon app · Xem thử 10 giây · Đặt lại vị trí & kích thước |
 | Nguồn tốc độ | Vietmap Live · GOFA |
 
-12 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng.
+18 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng, và nhóm lấy ý tưởng từ xe hơi theo phong cách HarmonyOS: Vô lăng, Bánh xe (mâm quay theo tốc độ), Thẻ HarmonyOS, Đồng hồ kim, Vòng kép HarmonyOS, Live View.
 
 Icon: `speedpopprefs/Resources/icon*.png` (Cài đặt), `SpeedPop.png` (icon gói trong Sileo/Zebra), bản gốc `assets/icon-1024.png`.
 

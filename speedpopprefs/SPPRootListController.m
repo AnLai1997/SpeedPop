@@ -52,6 +52,12 @@ static NSString *L(NSString *key)
             @"style.9":        @[@"Thanh đo", @"Meter bar"],
             @"style.10":       @[@"Chữ nổi (không nền)", @"Floating text"],
             @"style.11":       @[@"Thẻ sáng", @"Light card"],
+            @"style.12":       @[@"Vô lăng", @"Steering wheel"],
+            @"style.13":       @[@"Bánh xe (mâm quay)", @"Wheel (spinning rim)"],
+            @"style.14":       @[@"Thẻ HarmonyOS", @"HarmonyOS card"],
+            @"style.15":       @[@"Đồng hồ kim", @"Analog speedometer"],
+            @"style.16":       @[@"Vòng kép HarmonyOS", @"HarmonyOS rings"],
+            @"style.17":       @[@"Live View", @"Live View capsule"],
             @"showIcon":       @[@"Hiện icon app", @"Show app icon"],
             @"preview":        @[@"Xem thử (10 giây)", @"Preview (10 seconds)"],
             @"reset":          @[@"Đặt lại vị trí & kích thước", @"Reset position & size"],
@@ -121,7 +127,7 @@ static NSString *L(NSString *key)
         PSSpecifier *style = [self pref:L(@"style") key:@"Style" cell:PSLinkListCell default:@0];
         NSMutableArray *titles = [NSMutableArray array];
         NSMutableArray *values = [NSMutableArray array];
-        for (int i = 0; i < 12; i++) { [values addObject:@(i)]; [titles addObject:L([NSString stringWithFormat:@"style.%d", i])]; }
+        for (int i = 0; i < 18; i++) { [values addObject:@(i)]; [titles addObject:L([NSString stringWithFormat:@"style.%d", i])]; }
         [style setValues:values titles:titles shortTitles:titles];
         [a addObject:style];
         [a addObject:[self pref:L(@"showIcon") key:@"ShowAppIcon" cell:PSSwitchCell default:@YES]];
