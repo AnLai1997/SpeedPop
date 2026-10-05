@@ -379,6 +379,7 @@ typedef NS_ENUM(NSInteger, SPPIconShape) {
 // Trang thai hien/an cua tung app (co the chay ca Vietmap lan GOFA cung luc)
 static BOOL sAppFg[8];
 static CFAbsoluteTime sAppSeenAt[8];
+static int sPreferredApp = -1;   // app mo gan nhat (nguon uu tien)
 
 // Co app dan duong nao dang hien (va con gui du lieu) -> an bong bong
 - (BOOL)anyAppForeground
@@ -393,8 +394,13 @@ static CFAbsoluteTime sAppSeenAt[8];
     app &= 7;
     if (fg != sAppFg[app]) SPPLog("bubble: %@ %@", SPPNavAppName(app), fg ? @"dang hien -> an bong bong" : @"chay nen -> hien bong bong");
     sAppFg[app] = fg; sAppSeenAt[app] = CFAbsoluteTimeGetCurrent();
+    if (fg) sPreferredApp = app;   // app nguoi dung mo gan nhat -> nguon uu tien khi ca 2 app cung chay
+    // Giu 1 nguon: chi doi sang app khac khi nguon dang theo het du lieu (> 2 giay), hoac app kia la app vua mo
+    CFAbsoluteTime age = CFAbsoluteTimeGetCurrent() - self.lastUpdate;
+    BOOL accept = (app == self.app) || age > 2.0 || self.speed < 0 || (app == sPreferredApp && self.app != sPreferredApp);
+    if (!accept) return;
     // App dang hien khong gianh nguon cua app khac dang chay nen (bong bong van an toi khi het app nao dang hien)
-    BOOL otherFresh = app != self.app && !sAppFg[self.app] && (CFAbsoluteTimeGetCurrent() - self.lastUpdate) < SPP_SPEED_STALE;
+    BOOL otherFresh = app != self.app && !sAppFg[self.app] && age < SPP_SPEED_STALE;
     if (!(fg && otherFresh)) {
         if (app != self.app) SPPLog("bubble: nguon toc do -> %@", SPPNavAppName(app));
         self.app = app;

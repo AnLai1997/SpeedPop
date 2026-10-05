@@ -303,9 +303,187 @@ static CFAbsoluteTime sScanSpeedAt = 0, sScanLimitAt = 0;
 #define SPP_LIMIT_FRESH  2.0    // giay: bien bien mat khoi man hinh app bao lau thi bo (chong chop khi 1 lan quet truot)
 #define SPP_TICK         0.3    // giay: nhip quet man hinh + gui toc do / gioi han sang SpringBoard
 
+// ---------------------------------------------------------------------
+//  Kenh du lieu Flutter (vd Vietmap Live): doc toc do / gioi han trong ban tin giua Dart va code native cua app.
+//  Ban tin van chay khi app chay nen (cay accessibility cua Flutter thi dung yen -> so cu). KHONG doc cua so noi.
+//  Hook FlutterEngine: Dart -> native (handler cua tung kenh) va native -> Dart (sendOnChannel:).
+// ---------------------------------------------------------------------
+static int sChanLimit = -1, sChanSpeed = -1;
+static CFAbsoluteTime sChanLimitAt = 0, sChanSpeedAt = 0;
+static NSString *sChanLimitSource;   // "kenh/khoa" da cho gioi han (ghi log)
+
+#define SPP_CHAN_LIMIT_KEEP 600.0   // giay: app gui gioi han khi doi -> giu gia tri cuoi toi da 10 phut
+
+static int SPPNumberValue(id v)
+{
+    if ([v isKindOfClass:[NSNumber class]]) return [v intValue];
+    if ([v isKindOfClass:[NSString class]]) {
+        NSString *t = [v stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (SPPIsNumeric(t)) return t.intValue;
+    }
+    return INT_MIN;
+}
+
+// Tim khoa gioi han / toc do trong du lieu (dict / array / chuoi JSON), de quy
+static void SPPFindSpeedKeys(id obj, NSString *key, int depth, int *limit, NSString **limitKey, int *speed)
+{
+    if (!obj || depth > 8) return;
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        for (id k in (NSDictionary *)obj) SPPFindSpeedKeys(((NSDictionary *)obj)[k], [k description], depth + 1, limit, limitKey, speed);
+        return;
+    }
+    if ([obj isKindOfClass:[NSArray class]]) {
+        for (id v in (NSArray *)obj) SPPFindSpeedKeys(v, key, depth + 1, limit, limitKey, speed);
+        return;
+    }
+    if ([obj isKindOfClass:[NSString class]] && [(NSString *)obj length] > 1 && [(NSString *)obj length] < 8192) {
+        unichar c0 = [(NSString *)obj characterAtIndex:0];
+        if (c0 == '{' || c0 == '[') {
+            id j = [NSJSONSerialization JSONObjectWithData:[(NSString *)obj dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+            if (j) { SPPFindSpeedKeys(j, key, depth + 1, limit, limitKey, speed); return; }
+        }
+    }
+    if (!key) return;
+    NSString *lk = [key lowercaseString];
+    int v = SPPNumberValue(obj);
+    BOOL isNull = (obj == [NSNull null]);
+    if ([lk containsString:@"limit"] || [lk containsString:@"maxspeed"] || [lk containsString:@"max_speed"]) {
+        if (isNull || v == 0) { *limit = 0; *limitKey = key; }            // co khoa nhung khong co bien
+        else if (v >= 5 && v <= 200) { *limit = v; *limitKey = key; }
+    } else if (v != INT_MIN && v >= 0 && v <= 300 &&
+               ([lk isEqualToString:@"speed"] || [lk containsString:@"currentspeed"] || [lk containsString:@"current_speed"])) {
+        *speed = v;
+    }
+}
+
+// Giai ma ban tin (method call / envelope / message) bang codec chuan hoac JSON
+static id SPPDecodeFlutter(NSData *msg, NSString **method)
+{
+    if (!msg.length || msg.length > 16384) return nil;
+    id call = nil, value = nil;
+    Class std = objc_getClass("FlutterStandardMethodCodec"), json = objc_getClass("FlutterJSONMethodCodec");
+    for (Class cc in @[std ?: [NSNull class], json ?: [NSNull class]]) {
+        if (cc == [NSNull class]) continue;
+        id codec = objcInvoke(cc, @"sharedInstance");
+        @try { call = objcInvoke_1(codec, @"decodeMethodCall:", msg); } @catch (NSException *e) { call = nil; }
+        if (call) {
+            *method = objcInvoke(call, @"method");
+            return objcInvoke(call, @"arguments");
+        }
+        @try { value = objcInvoke_1(codec, @"decodeEnvelope:", msg); } @catch (NSException *e) { value = nil; }
+        if (value) return value;
+    }
+    Class smc = objc_getClass("FlutterStandardMessageCodec");
+    if (smc) {
+        @try { value = objcInvoke_1(objcInvoke(smc, @"sharedInstance"), @"decode:", msg); } @catch (NSException *e) { value = nil; }
+        if (value) return value;
+    }
+    return nil;
+}
+
+// Ghi log: moi (kenh + method) toi da 3 lan dau; ban tin co chu "limit" / "speed" moi 20 giay 1 lan
+static void SPPSniffLog(NSString *dir, NSString *channel, NSString *method, id args)
+{
+    static NSMutableDictionary<NSString *, NSNumber *> *seen;
+    static NSMutableDictionary<NSString *, NSNumber *> *lastAt;
+    if (!seen) { seen = [NSMutableDictionary dictionary]; lastAt = [NSMutableDictionary dictionary]; }
+    NSString *k = [NSString stringWithFormat:@"%@ %@ %@", dir, channel, method ?: @"-"];
+    NSString *d = [args description] ?: @"(nil)";
+    d = [[d stringByReplacingOccurrencesOfString:@"\n" withString:@" "] stringByReplacingOccurrencesOfString:@"    " withString:@""];
+    if (d.length > 400) d = [[d substringToIndex:400] stringByAppendingString:@"..."];
+    int n = seen[k].intValue;
+    NSString *ld = [d lowercaseString];
+    BOOL interesting = [ld containsString:@"limit"] || [ld containsString:@"speed"];
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    if (n < 3 || (interesting && now - lastAt[k].doubleValue > 20)) {
+        seen[k] = @(n + 1); lastAt[k] = @(now);
+        SPPLog("kenh %@ %@ %@: %@", dir, channel, method ?: @"-", d);
+    }
+}
+
+static void SPPSniff(NSString *dir, NSString *channel, NSData *msg)
+{
+    if (!channel || [channel hasPrefix:@"flutter/"]) return;   // kenh he thong cua Flutter (lifecycle, platform...)
+    NSString *method = nil;
+    id args = SPPDecodeFlutter(msg, &method);
+    if (!args && !method) return;
+    SPPSniffLog(dir, channel, method, args);
+    int limit = -1, speed = -1; NSString *limitKey = nil;
+    SPPFindSpeedKeys(args, method, 0, &limit, &limitKey, &speed);
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    if (limitKey) {
+        int v = limit > 0 ? limit : -1;
+        if (v != sChanLimit || !sChanLimitSource) SPPLog("kenh: gioi han %d (%@ / %@)", v, channel, limitKey);
+        sChanLimit = v; sChanLimitAt = now;
+        sChanLimitSource = [NSString stringWithFormat:@"%@/%@", channel, limitKey];
+    }
+    if (speed >= 0) { sChanSpeed = speed; sChanSpeedAt = now; }
+}
+
+typedef void (^SPPBinaryHandler)(NSData *message, id reply);
+
+static int64_t (*orig_setHandler)(id, SEL, NSString *, SPPBinaryHandler);
+static int64_t hook_setHandler(id self, SEL _cmd, NSString *channel, SPPBinaryHandler handler)
+{
+    SPPBinaryHandler wrapped = nil;
+    if (handler) wrapped = ^(NSData *message, id reply) {
+        SPPSniff(@"dart->app", channel, message);
+        handler(message, reply);
+    };
+    return orig_setHandler(self, _cmd, channel, wrapped);
+}
+
+static int64_t (*orig_setHandlerTQ)(id, SEL, NSString *, SPPBinaryHandler, id);
+static int64_t hook_setHandlerTQ(id self, SEL _cmd, NSString *channel, SPPBinaryHandler handler, id queue)
+{
+    SPPBinaryHandler wrapped = nil;
+    if (handler) wrapped = ^(NSData *message, id reply) {
+        SPPSniff(@"dart->app", channel, message);
+        handler(message, reply);
+    };
+    return orig_setHandlerTQ(self, _cmd, channel, wrapped, queue);
+}
+
+static void (*orig_send)(id, SEL, NSString *, NSData *);
+static void hook_send(id self, SEL _cmd, NSString *channel, NSData *message)
+{
+    SPPSniff(@"app->dart", channel, message);
+    orig_send(self, _cmd, channel, message);
+}
+
+static void (*orig_sendReply)(id, SEL, NSString *, NSData *, id);
+static void hook_sendReply(id self, SEL _cmd, NSString *channel, NSData *message, id reply)
+{
+    SPPSniff(@"app->dart", channel, message);
+    orig_sendReply(self, _cmd, channel, message, reply);
+}
+
+// Cai hook vao FlutterEngine (app khong dung Flutter -> bo qua)
+static void SPPHookFlutterChannels(void)
+{
+    Class engine = objc_getClass("FlutterEngine");
+    if (!engine) { SPPLog("kenh: app khong dung Flutter"); return; }
+    struct { SEL sel; void *hook; void **orig; } list[] = {
+        { NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:"), (void *)hook_setHandler, (void **)&orig_setHandler },
+        { NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:taskQueue:"), (void *)hook_setHandlerTQ, (void **)&orig_setHandlerTQ },
+        { NSSelectorFromString(@"sendOnChannel:message:"), (void *)hook_send, (void **)&orig_send },
+        { NSSelectorFromString(@"sendOnChannel:message:binaryReply:"), (void *)hook_sendReply, (void **)&orig_sendReply },
+    };
+    int n = 0;
+    for (size_t i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+        if (!class_getInstanceMethod(engine, list[i].sel)) continue;
+        MSHookMessageEx(engine, list[i].sel, (IMP)list[i].hook, (IMP *)list[i].orig);
+        n++;
+    }
+    SPPLog("kenh: da hook %d ham cua FlutterEngine", n);
+}
+
+// Gioi han hien tai: uu tien so app gui qua kenh du lieu (dung ca khi chay nen); khong co thi so quet tren man hinh
 static int SPPCurrentLimit(void)
 {
-    return (CFAbsoluteTimeGetCurrent() - sScanLimitAt) < SPP_LIMIT_FRESH ? sScanLimit : -1;
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    if (sChanLimitAt > 0 && now - sChanLimitAt < SPP_CHAN_LIMIT_KEEP) return sChanLimit;
+    return (now - sScanLimitAt) < SPP_LIMIT_FRESH ? sScanLimit : -1;
 }
 
 // Toc do km/h tu 1 vi tri; -1 neu vi tri cu / sai so qua lon
@@ -738,8 +916,12 @@ static void SPPSpeedTick(void)
     // khong bi het han du lieu khi GPS cham / app tat-bat GPS (bong bong khong chop tat)
     if (gps >= 0) SPPSendSpeed(gps, limit);
     else if (scan >= 0) SPPSendSpeed(scan, limit);
-    if (doLog) SPPLog("speed: gps=%d (vi tri cach %.1fs, GPS rieng %@) quet=%d gioi han=%d -> gui %d", gps, age,
-                      [SPPSpeedGPS shared].mgr ? @"bat" : @"tat", scan, limit, gps >= 0 ? gps : scan);
+    if (doLog) SPPLog("speed: gps=%d (vi tri cach %.1fs, GPS rieng %@) quet=%d gioi han=%d (%@) -> gui %d", gps, age,
+                      [SPPSpeedGPS shared].mgr ? @"bat" : @"tat", scan, limit,
+                      (sChanLimitAt > 0 && CFAbsoluteTimeGetCurrent() - sChanLimitAt < SPP_CHAN_LIMIT_KEEP)
+                          ? [NSString stringWithFormat:@"kenh %@, %.0fs truoc", sChanLimitSource, CFAbsoluteTimeGetCurrent() - sChanLimitAt]
+                          : @"quet man hinh",
+                      gps >= 0 ? gps : scan);
 }
 
 %ctor
@@ -749,6 +931,7 @@ static void SPPSpeedTick(void)
     sAppIndex = idx;
     SPPLog("loaded into %@ (%@)", SPPNavAppName(idx), SPPNavAppBundle(idx));
     %init(NAVAPP);
+    SPPHookFlutterChannels();
     SPPEnableFlutterSemantics();
     SPPWatchForeground();
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
