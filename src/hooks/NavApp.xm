@@ -306,7 +306,7 @@ static CFAbsoluteTime sScanSpeedAt = 0, sScanLimitAt = 0;
 // ---------------------------------------------------------------------
 //  Kenh du lieu Flutter (vd Vietmap Live): doc toc do / gioi han trong ban tin giua Dart va code native cua app.
 //  Ban tin van chay khi app chay nen (cay accessibility cua Flutter thi dung yen -> so cu). KHONG doc cua so noi.
-//  Hook FlutterEngine: Dart -> native (handler cua tung kenh) va native -> Dart (sendOnChannel:).
+//  Chi nghe kenh co du lieu toc do (SPPSpeedChannels), chieu Dart -> native; kenh khac khong dung toi.
 // ---------------------------------------------------------------------
 static int sChanLimit = -1, sChanSpeed = -1;
 static CFAbsoluteTime sChanLimitAt = 0, sChanSpeedAt = 0;
@@ -356,58 +356,37 @@ static void SPPFindSpeedKeys(id obj, NSString *key, int depth, int *limit, NSStr
     }
 }
 
-// Giai ma ban tin (method call / envelope / message) bang codec chuan hoac JSON
-static id SPPDecodeFlutter(NSData *msg, NSString **method)
+// Kenh du lieu cua app co toc do / gioi han (chi nghe dung cac kenh nay, chieu Dart -> native):
+//   Vietmap Live: "vml_main_channel", method "updateSpeedLimit: <so>" (0 = khong co bien)
+static NSSet<NSString *> *SPPSpeedChannels(void)
 {
-    if (!msg.length || msg.length > 16384) return nil;
-    id call = nil, value = nil;
-    Class std = objc_getClass("FlutterStandardMethodCodec"), json = objc_getClass("FlutterJSONMethodCodec");
-    for (Class cc in @[std ?: [NSNull class], json ?: [NSNull class]]) {
-        if (cc == [NSNull class]) continue;
-        id codec = objcInvoke(cc, @"sharedInstance");
-        @try { call = objcInvoke_1(codec, @"decodeMethodCall:", msg); } @catch (NSException *e) { call = nil; }
-        if (call) {
-            *method = objcInvoke(call, @"method");
-            return objcInvoke(call, @"arguments");
-        }
-        @try { value = objcInvoke_1(codec, @"decodeEnvelope:", msg); } @catch (NSException *e) { value = nil; }
-        if (value) return value;
-    }
-    Class smc = objc_getClass("FlutterStandardMessageCodec");
-    if (smc) {
-        @try { value = objcInvoke_1(objcInvoke(smc, @"sharedInstance"), @"decode:", msg); } @catch (NSException *e) { value = nil; }
-        if (value) return value;
-    }
-    return nil;
+    static NSSet *s; static dispatch_once_t once;
+    dispatch_once(&once, ^{ s = [NSSet setWithObjects:@"vml_main_channel", nil]; });
+    return s;
 }
 
-// Ghi log: moi (kenh + method) toi da 3 lan dau; ban tin co chu "limit" / "speed" moi 20 giay 1 lan
-static void SPPSniffLog(NSString *dir, NSString *channel, NSString *method, id args)
+// Ban tin tren kenh da chon: giai ma method call (codec chuan), lay gioi han / toc do. Chay tren luong chinh.
+static void SPPHandleChannelCall(NSString *channel, NSData *msg)
 {
-    static NSMutableDictionary<NSString *, NSNumber *> *seen;
-    static NSMutableDictionary<NSString *, NSNumber *> *lastAt;
-    if (!seen) { seen = [NSMutableDictionary dictionary]; lastAt = [NSMutableDictionary dictionary]; }
-    NSString *k = [NSString stringWithFormat:@"%@ %@ %@", dir, channel, method ?: @"-"];
-    NSString *d = [args description] ?: @"(nil)";
-    d = [[d stringByReplacingOccurrencesOfString:@"\n" withString:@" "] stringByReplacingOccurrencesOfString:@"    " withString:@""];
-    if (d.length > 400) d = [[d substringToIndex:400] stringByAppendingString:@"..."];
-    int n = seen[k].intValue;
-    NSString *ld = [d lowercaseString];
-    BOOL interesting = [ld containsString:@"limit"] || [ld containsString:@"speed"];
-    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
-    if (n < 3 || (interesting && now - lastAt[k].doubleValue > 20)) {
-        seen[k] = @(n + 1); lastAt[k] = @(now);
-        SPPLog("kenh %@ %@ %@: %@", dir, channel, method ?: @"-", d);
-    }
-}
+    if (!msg.length || msg.length > 4096) return;
+    Class std = objc_getClass("FlutterStandardMethodCodec");
+    if (!std) return;
+    id call = nil;
+    @try { call = objcInvoke_1(objcInvoke(std, @"sharedInstance"), @"decodeMethodCall:", msg); } @catch (NSException *e) { return; }
+    NSString *method = call ? objcInvoke(call, @"method") : nil;
+    if (![method isKindOfClass:[NSString class]]) return;
+    id args = objcInvoke(call, @"arguments");
 
-static void SPPSniff(NSString *dir, NSString *channel, NSData *msg)
-{
-    if (!channel || [channel hasPrefix:@"flutter/"]) return;   // kenh he thong cua Flutter (lifecycle, platform...)
-    NSString *method = nil;
-    id args = SPPDecodeFlutter(msg, &method);
-    if (!args && !method) return;
-    SPPSniffLog(dir, channel, method, args);
+    // Log: moi method lan dau (de biet kenh co nhung gi)
+    static NSMutableSet *seen;
+    if (!seen) seen = [NSMutableSet set];
+    if (![seen containsObject:method]) {
+        [seen addObject:method];
+        NSString *d = [[args description] ?: @"(nil)" stringByReplacingOccurrencesOfString:@"\n" withString:@" "];
+        if (d.length > 200) d = [[d substringToIndex:200] stringByAppendingString:@"..."];
+        SPPLog("kenh %@ %@: %@", channel, method, d);
+    }
+
     int limit = -1, speed = -1; NSString *limitKey = nil;
     SPPFindSpeedKeys(args, method, 0, &limit, &limitKey, &speed);
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
@@ -422,60 +401,47 @@ static void SPPSniff(NSString *dir, NSString *channel, NSData *msg)
 
 typedef void (^SPPBinaryHandler)(NSData *message, id reply);
 
+// Chi boc handler cua kenh can doc; kenh khac giu nguyen (khong giai ma, khong log)
+static SPPBinaryHandler SPPWrapHandler(NSString *channel, SPPBinaryHandler handler)
+{
+    if (!handler || ![SPPSpeedChannels() containsObject:channel]) return handler;
+    SPPLog("kenh: nghe %@", channel);
+    NSString *ch = [channel copy];
+    return ^(NSData *message, id reply) {
+        NSData *copy = [message copy];
+        if ([NSThread isMainThread]) SPPHandleChannelCall(ch, copy);
+        else dispatch_async(dispatch_get_main_queue(), ^{ SPPHandleChannelCall(ch, copy); });
+        handler(message, reply);
+    };
+}
+
 static int64_t (*orig_setHandler)(id, SEL, NSString *, SPPBinaryHandler);
 static int64_t hook_setHandler(id self, SEL _cmd, NSString *channel, SPPBinaryHandler handler)
 {
-    SPPBinaryHandler wrapped = nil;
-    if (handler) wrapped = ^(NSData *message, id reply) {
-        SPPSniff(@"dart->app", channel, message);
-        handler(message, reply);
-    };
-    return orig_setHandler(self, _cmd, channel, wrapped);
+    return orig_setHandler(self, _cmd, channel, SPPWrapHandler(channel, handler));
 }
 
 static int64_t (*orig_setHandlerTQ)(id, SEL, NSString *, SPPBinaryHandler, id);
 static int64_t hook_setHandlerTQ(id self, SEL _cmd, NSString *channel, SPPBinaryHandler handler, id queue)
 {
-    SPPBinaryHandler wrapped = nil;
-    if (handler) wrapped = ^(NSData *message, id reply) {
-        SPPSniff(@"dart->app", channel, message);
-        handler(message, reply);
-    };
-    return orig_setHandlerTQ(self, _cmd, channel, wrapped, queue);
+    return orig_setHandlerTQ(self, _cmd, channel, SPPWrapHandler(channel, handler), queue);
 }
 
-static void (*orig_send)(id, SEL, NSString *, NSData *);
-static void hook_send(id self, SEL _cmd, NSString *channel, NSData *message)
-{
-    SPPSniff(@"app->dart", channel, message);
-    orig_send(self, _cmd, channel, message);
-}
-
-static void (*orig_sendReply)(id, SEL, NSString *, NSData *, id);
-static void hook_sendReply(id self, SEL _cmd, NSString *channel, NSData *message, id reply)
-{
-    SPPSniff(@"app->dart", channel, message);
-    orig_sendReply(self, _cmd, channel, message, reply);
-}
-
-// Cai hook vao FlutterEngine (app khong dung Flutter -> bo qua)
+// Cai hook vao FlutterEngine (app khong dung Flutter -> bo qua). Ban co taskQueue la ham goc (ban kia goi vao no)
+// -> chi hook 1 ban de khong boc 2 lan.
 static void SPPHookFlutterChannels(void)
 {
     Class engine = objc_getClass("FlutterEngine");
     if (!engine) { SPPLog("kenh: app khong dung Flutter"); return; }
-    struct { SEL sel; void *hook; void **orig; } list[] = {
-        { NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:"), (void *)hook_setHandler, (void **)&orig_setHandler },
-        { NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:taskQueue:"), (void *)hook_setHandlerTQ, (void **)&orig_setHandlerTQ },
-        { NSSelectorFromString(@"sendOnChannel:message:"), (void *)hook_send, (void **)&orig_send },
-        { NSSelectorFromString(@"sendOnChannel:message:binaryReply:"), (void *)hook_sendReply, (void **)&orig_sendReply },
-    };
-    int n = 0;
-    for (size_t i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
-        if (!class_getInstanceMethod(engine, list[i].sel)) continue;
-        MSHookMessageEx(engine, list[i].sel, (IMP)list[i].hook, (IMP *)list[i].orig);
-        n++;
+    SEL tq = NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:taskQueue:");
+    SEL plain = NSSelectorFromString(@"setMessageHandlerOnChannel:binaryMessageHandler:");
+    if (class_getInstanceMethod(engine, tq)) {
+        MSHookMessageEx(engine, tq, (IMP)hook_setHandlerTQ, (IMP *)&orig_setHandlerTQ);
+        SPPLog("kenh: da hook FlutterEngine (taskQueue)");
+    } else if (class_getInstanceMethod(engine, plain)) {
+        MSHookMessageEx(engine, plain, (IMP)hook_setHandler, (IMP *)&orig_setHandler);
+        SPPLog("kenh: da hook FlutterEngine");
     }
-    SPPLog("kenh: da hook %d ham cua FlutterEngine", n);
 }
 
 // Gioi han hien tai: uu tien so app gui qua kenh du lieu (dung ca khi chay nen); khong co thi so quet tren man hinh
