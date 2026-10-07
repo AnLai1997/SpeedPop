@@ -1,0 +1,48 @@
+/* CarSpeed – Tiếng Việt */
+
+"LANGUAGE" = "Ngôn ngữ";
+"LANGUAGE_AUTO" = "Tự động (theo máy)";
+"HEADER_TAGLINE" = "Tốc độ & biển giới hạn từ app dẫn đường";
+"VERSION_FORMAT" = "Phiên bản: %@";
+"COPYRIGHT" = "Bản quyền © 2026 AnLai";
+"OK" = "OK";
+
+"GENERAL_FOOTER" = "Bong bóng luôn hiện khi app dẫn đường chạy nền (không có số liệu thì hiện --) và tự ẩn khi app được mở lại hoặc bị tắt. Khi kết nối CarPlay, bong bóng chỉ hiện trên màn hình xe; không có xe thì hiện trên iPhone. Thay đổi có hiệu lực ngay.";
+"ENABLE" = "Bật CarSpeed";
+
+/* TWEAK SETTINGS */
+
+"APPEARANCE" = "Giao diện";
+"APPEARANCE_FOOTER" = "Icon app cho biết tốc độ đang lấy từ app nào. Xem thử hiện bong bóng trong 10 giây.\n\nKéo để di chuyển · chụm 2 ngón để đổi cỡ · chạm để mở lại app · giữ 2 giây (viền đỏ chạy hết vòng) để thoát hẳn app.";
+"STYLE" = "Kiểu hiển thị";
+"SHOW_APP_ICON" = "Hiện icon app";
+"PREVIEW" = "Xem thử";
+"STYLE_0" = "Thẻ ngang";
+"STYLE_1" = "Đĩa nhỏ";
+"STYLE_2" = "Biển báo lớn";
+"STYLE_3" = "Đồng hồ";
+"STYLE_4" = "Thanh HUD";
+"STYLE_5" = "Màu theo tốc độ";
+"STYLE_6" = "Cột dọc";
+"STYLE_7" = "Viên thuốc đôi";
+"STYLE_8" = "Neon";
+"STYLE_9" = "Thanh đo";
+"STYLE_10" = "Chữ nổi (không nền)";
+"STYLE_11" = "Thẻ sáng";
+"STYLE_12" = "Vô lăng";
+"STYLE_13" = "Bánh xe (mâm quay)";
+"STYLE_14" = "Thẻ HarmonyOS";
+"STYLE_15" = "Đồng hồ kim";
+"STYLE_16" = "Vòng kép HarmonyOS";
+"STYLE_17" = "Live View";
+
+"SIZE_PHONE" = "Cỡ trên iPhone (%)";
+"SIZE_CAR" = "Cỡ trên CarPlay (%)";
+"SIZE_FOOTER" = "100 = cỡ mặc định (60 – 220). Chụm 2 ngón trên bong bóng cũng đổi cỡ của màn đang dùng và cập nhật ở đây.";
+"RESET_LAYOUT" = "Đặt lại vị trí & kích thước";
+"RESET_FOOTER" = "Đưa bong bóng về chỗ cũ, cỡ 100%.";
+
+"SOURCES" = "Nguồn tốc độ";
+"SOURCES_FOOTER" = "Chạy cả hai app: bong bóng theo app đang chạy nền. Lần đầu cài, mở lại app dẫn đường để tweak được nạp.";
+"APP_VIETMAP" = "Vietmap Live";
+"APP_GOFA" = "GOFA";

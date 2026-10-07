@@ -2,11 +2,28 @@ Package: carspeed
 Name: CarSpeed
 Version: 1.0.0
 Architecture: iphoneos-arm64
-Description: Floating speed-limit bubble (current speed + speed limit from Vietmap Live / GOFA) while the navigation app runs in the background - on the CarPlay screen when connected, otherwise on iPhone (Dopamine rootless)
-Author: anlai <laihoangan123456@gmail.com>
-Maintainer: anlai <laihoangan123456@gmail.com>
+Description: Your speed and the speed limit, always in view.
+ Keep your eyes on the road. CarSpeed shows a small floating bubble with your
+ current speed and the posted speed limit from Vietmap Live or GOFA while the
+ navigation app runs in the background - on the CarPlay screen when you are
+ connected, otherwise on your iPhone.
+ .
+ Features:
+  - Current speed and speed limit from Vietmap Live and GOFA
+  - Shows on the CarPlay screen, or on iPhone when no car is connected
+  - Stays on for the whole drive and hides when you open the app again
+  - 18 bubble styles, from a compact disc to an analog speedometer
+  - Drag to move, pinch to resize, sizes saved separately for iPhone and CarPlay
+  - Tap to jump back to the navigation app, hold to close it
+  - Preview any style right from Settings
+ .
+ Set it up in Settings > CarSpeed. Changes apply instantly.
+ .
+ Compatibility: iOS 15 and later, rootless jailbreaks (Dopamine, palera1n).
+Maintainer: AnLai <laihoangan123456@gmail.com>
+Author: AnLai <laihoangan123456@gmail.com>
 Section: Tweaks
 Icon: file:///var/jb/Library/PreferenceBundles/CarSpeedPrefs.bundle/CarSpeed.png
-Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0)
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 15.0)
 Conflicts: com.anlai97.speedpop
 Replaces: com.anlai97.speedpop
