@@ -62,7 +62,7 @@ static void SPPSendSpeed(int speed, int limit)
 static void SPPWatchForeground(void)
 {
     void (^resend)(void) = ^{
-        if (sLastSentSpeed >= 0) SPPSendSpeed(sLastSentSpeed, sLastSentLimit);
+        SPPSendSpeed(sLastSentSpeed, sLastSentLimit);
     };
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     for (NSNotificationName name in @[UISceneDidActivateNotification, UISceneWillDeactivateNotification,
@@ -880,8 +880,8 @@ static void SPPSpeedTick(void)
     int limit = SPPCurrentLimit();
     // Gui moi nhip (khong cho ban tin GPS): gioi han vua doi tren man hinh len bong bong ngay, va SpringBoard
     // khong bi het han du lieu khi GPS cham / app tat-bat GPS (bong bong khong chop tat)
-    if (gps >= 0) SPPSendSpeed(gps, limit);
-    else if (scan >= 0) SPPSendSpeed(scan, limit);
+    // Khong doc duoc toc do van gui (-1): SpringBoard biet app con song -> bong bong van hien "--"
+    SPPSendSpeed(gps >= 0 ? gps : scan, limit);
     if (doLog) SPPLog("speed: gps=%d (vi tri cach %.1fs, GPS rieng %@) quet=%d gioi han=%d (%@) -> gui %d", gps, age,
                       [SPPSpeedGPS shared].mgr ? @"bat" : @"tat", scan, limit,
                       (sChanLimitAt > 0 && CFAbsoluteTimeGetCurrent() - sChanLimitAt < SPP_CHAN_LIMIT_KEEP)
