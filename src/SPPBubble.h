@@ -6,7 +6,7 @@
 @interface SPPBubble : NSObject
 + (instancetype)shared;
 - (void)updateSpeed:(int)speed limit:(int)limit;   // speed/limit < 0 = khong co
-- (void)updateSpeed:(int)speed limit:(int)limit appForeground:(BOOL)fg;   // fg: app dang hien -> nguon uu tien
+- (void)updateSpeed:(int)speed limit:(int)limit appForeground:(BOOL)fg;   // fg: app dang hien -> an
 - (void)updateSpeed:(int)speed limit:(int)limit appForeground:(BOOL)fg app:(int)app;   // app: chi so SPP_NAV_APPS
 - (void)refresh;                                    // tinh lai hien/an
 - (void)hide;
