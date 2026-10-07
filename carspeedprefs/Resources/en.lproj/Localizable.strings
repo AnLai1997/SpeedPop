@@ -3,6 +3,8 @@
 "LANGUAGE" = "Language";
 "LANGUAGE_AUTO" = "Automatic (system)";
 "HEADER_TAGLINE" = "Speed & speed limit from your navigation app";
+"STATUS_ON" = "On";
+"STATUS_OFF" = "Off";
 "VERSION_FORMAT" = "Version: %@";
 "COPYRIGHT" = "Copyright © 2026 AnLai";
 "OK" = "OK";

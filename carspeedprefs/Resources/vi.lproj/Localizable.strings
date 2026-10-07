@@ -3,6 +3,8 @@
 "LANGUAGE" = "Ngôn ngữ";
 "LANGUAGE_AUTO" = "Tự động (theo máy)";
 "HEADER_TAGLINE" = "Tốc độ & biển giới hạn từ app dẫn đường";
+"STATUS_ON" = "Đang bật";
+"STATUS_OFF" = "Đang tắt";
 "VERSION_FORMAT" = "Phiên bản: %@";
 "COPYRIGHT" = "Bản quyền © 2026 AnLai";
 "OK" = "OK";
