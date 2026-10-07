@@ -1,0 +1,48 @@
+/* CarSpeed – English */
+
+"LANGUAGE" = "Language";
+"LANGUAGE_AUTO" = "Automatic (system)";
+"HEADER_TAGLINE" = "Speed & speed limit from your navigation app";
+"VERSION_FORMAT" = "Version: %@";
+"COPYRIGHT" = "Copyright © 2026 AnLai";
+"OK" = "OK";
+
+"GENERAL_FOOTER" = "The bubble stays on while a navigation app runs in the background (showing -- when there is no reading) and hides when the app is opened again or closed. With CarPlay connected it shows only on the car screen; otherwise on the iPhone. Changes apply instantly.";
+"ENABLE" = "Enable CarSpeed";
+
+/* TWEAK SETTINGS */
+
+"APPEARANCE" = "Appearance";
+"APPEARANCE_FOOTER" = "The app icon shows which app the speed comes from. Preview shows the bubble for 10 seconds.\n\nDrag to move · pinch to resize · tap to reopen the app · hold for 2 seconds (until the red ring completes) to quit the app.";
+"STYLE" = "Style";
+"SHOW_APP_ICON" = "Show app icon";
+"PREVIEW" = "Preview";
+"STYLE_0" = "Card";
+"STYLE_1" = "Mini disc";
+"STYLE_2" = "Big sign";
+"STYLE_3" = "Gauge";
+"STYLE_4" = "HUD bar";
+"STYLE_5" = "Speed color";
+"STYLE_6" = "Tower";
+"STYLE_7" = "Split pill";
+"STYLE_8" = "Neon";
+"STYLE_9" = "Meter bar";
+"STYLE_10" = "Floating text";
+"STYLE_11" = "Light card";
+"STYLE_12" = "Steering wheel";
+"STYLE_13" = "Wheel (spinning rim)";
+"STYLE_14" = "HarmonyOS card";
+"STYLE_15" = "Analog speedometer";
+"STYLE_16" = "HarmonyOS rings";
+"STYLE_17" = "Live View capsule";
+
+"SIZE_PHONE" = "Size on iPhone (%)";
+"SIZE_CAR" = "Size on CarPlay (%)";
+"SIZE_FOOTER" = "100 = default size (60 – 220). Pinching the bubble also resizes it on the current screen and updates this value.";
+"RESET_LAYOUT" = "Reset position & size";
+"RESET_FOOTER" = "Moves the bubble back to its default place at 100% size.";
+
+"SOURCES" = "Speed sources";
+"SOURCES_FOOTER" = "With both apps running, the bubble follows the one in the background. After the first install, relaunch the navigation app so the tweak loads.";
+"APP_VIETMAP" = "Vietmap Live";
+"APP_GOFA" = "GOFA";

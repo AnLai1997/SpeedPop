@@ -9,8 +9,8 @@ CarSpeedPrefs_FILES = SPPRootListController.m
 CarSpeedPrefs_INSTALL_PATH = /Library/PreferenceBundles
 CarSpeedPrefs_FRAMEWORKS = UIKit
 CarSpeedPrefs_PRIVATE_FRAMEWORKS = Preferences
-# Hien version trong Settings, lay tu file control
+# Version shown in the footer card (TWEAK_VERSION), read from ../control
 SPP_VERSION := $(shell grep -m1 '^Version:' ../control | cut -d' ' -f2 | tr -d '\r')
-CarSpeedPrefs_CFLAGS = -fobjc-arc -DSPP_VERSION='"$(SPP_VERSION)"'
+CarSpeedPrefs_CFLAGS = -fobjc-arc -DTWEAK_VERSION='"$(SPP_VERSION)"'
 
 include $(THEOS_MAKE_PATH)/bundle.mk

@@ -14,7 +14,7 @@ Tách ra từ tính năng bong bóng tốc độ của CarDuo (SplitCarPlay), b�
 | Vietmap Live | `vn.vietmap.live` |
 | GOFA | `com.lumi.GOFA` |
 
-Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_NAMES` (`src/common.h`), vào `CarSpeed.plist`, thêm khoá bật/tắt trong `SPPPrefs.mm` và `carspeedprefs/SPPRootListController.m`.
+Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_NAMES` (`src/common.h`), vào `CarSpeed.plist`, thêm khoá bật/tắt trong `SPPPrefs.mm`, `carspeedprefs/Resources/Root.plist` và 2 file `Localizable.strings` (vi/en).
 
 ## Thao tác
 
@@ -25,18 +25,18 @@ Thêm app khác: thêm bundle ID vào **cuối** `SPP_NAV_APPS` / `SPP_NAV_APP_N
 | Chạm | Mở lại app đang cấp tốc độ (trên xe: giao diện CarPlay của app) |
 | Giữ 2 giây | Viền đỏ chạy quanh bong bóng, chạy hết vòng thì thoát hẳn app đó (thả tay sớm để huỷ) |
 
-Cài đặt > CarSpeed (Tiếng Việt / English, mặc định theo ngôn ngữ máy):
+Cài đặt > CarSpeed (Tiếng Việt / English, mặc định theo ngôn ngữ máy; đổi bằng nút quả địa cầu trên thanh điều hướng):
 
 | Nhóm | Mục |
 | --- | --- |
-| Chung | Bật bong bóng · Ngôn ngữ |
+| Chung | Bật CarSpeed |
 | Giao diện | Kiểu hiển thị · Hiện icon app · Xem thử 10 giây |
 | Kích thước | Trên iPhone · Trên CarPlay (60–220, 100 = mặc định) · Đặt lại vị trí & kích thước |
 | Nguồn tốc độ | Vietmap Live · GOFA |
 
 18 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng, và nhóm lấy ý tưởng từ xe hơi theo phong cách HarmonyOS: Vô lăng, Bánh xe (mâm quay theo tốc độ), Thẻ HarmonyOS, Đồng hồ kim, Vòng kép HarmonyOS, Live View.
 
-Icon: `carspeedprefs/Resources/icon*.png` (Cài đặt), `CarSpeed.png` (icon gói trong Sileo/Zebra), bản gốc `assets/icon-1024.png` — vẽ lại bằng `powershell -File assets/make-icon.ps1 -Out <thư mục>` (Windows, cần font Bahnschrift).
+Icon: `carspeedprefs/Resources/icon*.png` (Cài đặt), `CarSpeed.png` (icon gói trong Sileo/Zebra), `logo*.png` (thẻ đầu trang Cài đặt, thu nhỏ từ `assets/icon-1024.png`), bản gốc `assets/icon-1024.png` — vẽ lại bằng `powershell -File assets/make-icon.ps1 -Out <thư mục>` (Windows, cần font Bahnschrift).
 
 ## Phát hành
 
