@@ -33,7 +33,7 @@ static BOOL SPPIsCircle(UIView *v)
     return v.layer.cornerRadius >= MIN(s.width, s.height) / 2 - 2;
 }
 
-// App dang hien (scene iPhone hoac CarPlay dang o tren cung) -> SpringBoard an bong bong
+// App dang hien (scene iPhone hoac CarPlay dang o tren cung) -> SpringBoard lay lam nguon uu tien
 static BOOL SPPAppForeground(void)
 {
     if (![NSThread isMainThread]) return NO;

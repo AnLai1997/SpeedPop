@@ -2,12 +2,12 @@
 
 # CarSpeed
 
-Bong bóng tốc độ nổi (tốc độ hiện tại + biển giới hạn tốc độ lấy từ app dẫn đường **Vietmap Live** hoặc **GOFA**) khi app đó đang chạy nền.
+Bong bóng tốc độ nổi (tốc độ hiện tại + biển giới hạn tốc độ lấy từ app dẫn đường **Vietmap Live** hoặc **GOFA**) khi app đó đang chạy (mở trên màn hình hoặc chạy nền).
 Tách ra từ tính năng bong bóng tốc độ của CarDuo (SplitCarPlay), bỏ toàn bộ phần chia màn hình.
 
 - Dopamine rootless, iOS 15.0 – 16.6.1 (build với SDK 16.5)
 - Có xe CarPlay: bong bóng **chỉ** nằm trên màn xe, không hiện trên iPhone. Không có xe: nằm trên iPhone (xoay theo hướng máy).
-- Luôn hiện khi app dẫn đường đang chạy nền; không đọc được tốc độ / giới hạn thì hiện `--`. Chỉ ẩn khi app dẫn đường hiện lại (trên iPhone hoặc CarPlay) hoặc khi app bị tắt.
+- Luôn hiện khi app dẫn đường đang chạy, kể cả khi app đang mở trên iPhone / CarPlay; không đọc được tốc độ / giới hạn thì hiện `--`. Chỉ ẩn khi app bị tắt.
 
 | App | Bundle ID |
 | --- | --- |

@@ -406,23 +406,14 @@ typedef NS_ENUM(NSInteger, SPPIconShape) {
 
 // Trang thai hien/an cua tung app (co the chay ca Vietmap lan GOFA cung luc)
 static BOOL sAppFg[8];
-static CFAbsoluteTime sAppSeenAt[8];
 static int sPreferredApp = -1;   // app mo gan nhat (nguon uu tien)
-
-// Co app dan duong nao dang hien (va con gui du lieu) -> an bong bong
-- (BOOL)anyAppForeground
-{
-    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < 8; i++) if (sAppFg[i] && now - sAppSeenAt[i] < SPP_SPEED_STALE) return YES;
-    return NO;
-}
 
 - (void)updateSpeed:(int)speed limit:(int)limit appForeground:(BOOL)fg app:(int)app
 {
     app &= 7;
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
-    if (fg != sAppFg[app]) SPPLog("bubble: %@ %@", SPPNavAppName(app), fg ? @"dang hien -> an bong bong" : @"chay nen -> hien bong bong");
-    sAppFg[app] = fg; sAppSeenAt[app] = now;
+    if (fg != sAppFg[app]) SPPLog("bubble: %@ %@", SPPNavAppName(app), fg ? @"dang hien" : @"chay nen");
+    sAppFg[app] = fg;
     if (fg) sPreferredApp = app;   // app nguoi dung mo gan nhat -> nguon uu tien khi ca 2 app cung chay
     // Giu 1 nguon: chi doi sang app khac khi nguon dang theo im lang (> 2 giay), nguon dang theo khong co so ma app kia
     // co, hoac app kia la app vua mo
@@ -430,21 +421,17 @@ static int sPreferredApp = -1;   // app mo gan nhat (nguon uu tien)
     BOOL accept = (app == self.app) || age > 2.0 || (self.speed < 0 && speed >= 0)
                   || (app == sPreferredApp && self.app != sPreferredApp);
     if (!accept) return;
-    // App dang hien khong gianh nguon cua app khac dang chay nen (bong bong van an toi khi het app nao dang hien)
-    BOOL otherFresh = app != self.app && !sAppFg[self.app] && age < SPP_SPEED_STALE;
-    if (!(fg && otherFresh)) {
-        if (app != self.app) {
-            SPPLog("bubble: nguon toc do -> %@", SPPNavAppName(app));
-            self.speedAt = 0; self.limitAt = 0;   // so cu cua app kia khong giu lai
-        }
-        self.app = app;
-        // Tam khong doc duoc (-1): giu so cu SPP_VALUE_HOLD giay roi moi hien "--"
-        if (speed >= 0) { self.speed = speed; self.speedAt = now; }
-        else if (now - self.speedAt > SPP_VALUE_HOLD) self.speed = -1;
-        if (limit > 0) { self.limit = limit; self.limitAt = now; }
-        else if (now - self.limitAt > SPP_VALUE_HOLD) self.limit = -1;
-        self.lastUpdate = now;
+    if (app != self.app) {
+        SPPLog("bubble: nguon toc do -> %@", SPPNavAppName(app));
+        self.speedAt = 0; self.limitAt = 0;   // so cu cua app kia khong giu lai
     }
+    self.app = app;
+    // Tam khong doc duoc (-1): giu so cu SPP_VALUE_HOLD giay roi moi hien "--"
+    if (speed >= 0) { self.speed = speed; self.speedAt = now; }
+    else if (now - self.speedAt > SPP_VALUE_HOLD) self.speed = -1;
+    if (limit > 0) { self.limit = limit; self.limitAt = now; }
+    else if (now - self.limitAt > SPP_VALUE_HOLD) self.limit = -1;
+    self.lastUpdate = now;
     [self refresh];
 }
 
@@ -471,8 +458,8 @@ static BOOL sSeenRunning[8];
     return sSeenRunning[app] ? 0 : -1;
 }
 
-// Bong bong LUON hien khi app dan duong con chay nen - khong doc duoc so thi hien "--".
-// Chi an khi: tat trong Cai dat, app dan duong dang hien, app da bi tat, hoac chua tung / lau qua khong nghe tu app.
+// Bong bong LUON hien khi app dan duong con chay (dang mo tren man hinh hoac chay nen) - khong doc duoc so thi hien "--".
+// Chi an khi: tat trong Cai dat, app da bi tat, hoac chua tung / lau qua khong nghe tu app.
 - (void)refresh
 {
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
@@ -480,7 +467,7 @@ static BOOL sSeenRunning[8];
     if (now - self.limitAt > SPP_SPEED_STALE) self.limit = -1;
     int run = (self.lastUpdate > 0 && !self.demoTimer) ? [self sourceAppState] : 1;
     BOOL alive = self.lastUpdate > 0 && (run == 1 || now - self.lastUpdate < SPP_SOURCE_GONE);
-    BOOL show = alive && [SPPPrefs enabled] && ![self anyAppForeground];
+    BOOL show = alive && [SPPPrefs enabled];
     // App vua bi tat (vuot khoi da nhiem / bi he thong dong) -> an ngay
     if (show && run == 0) {
         SPPLog("bubble: %@ da tat -> an bong bong ngay", SPPNavAppName(self.app));
@@ -489,8 +476,8 @@ static BOOL sSeenRunning[8];
     }
     if (!show) {
         if (self.window && !self.window.hidden)
-            SPPLog("bubble: an (ban tin %.1fs truoc, app chay=%d, tat=%d, app dan duong dang hien=%d)",
-                   now - self.lastUpdate, run, ![SPPPrefs enabled], [self anyAppForeground]);
+            SPPLog("bubble: an (ban tin %.1fs truoc, app chay=%d, tat=%d)",
+                   now - self.lastUpdate, run, ![SPPPrefs enabled]);
         [self hide];
         return;
     }
