@@ -946,13 +946,6 @@ static void SPPAlignUnit(UILabel *unit, UILabel *number, CGFloat x, CGFloat midY
     unit.frame = CGRectMake(x, base - unit.font.ascender, w, unit.font.lineHeight);
 }
 
-static void SPPPlaceRect(UIView *v, CGRect r)
-{
-    v.bounds = CGRectMake(0, 0, r.size.width, r.size.height);
-    v.center = CGPointMake(CGRectGetMidX(r), CGRectGetMidY(r));
-    [v setNeedsLayout];
-}
-
 static void SPPPlace(UIView *v, CGFloat cx, CGFloat cy, CGFloat size)
 {
     v.bounds = CGRectMake(0, 0, size, size);
