@@ -183,8 +183,7 @@ static BOOL SPPEnabled(void) {
 	_taglineLabel = [UILabel new];
 	_taglineLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
 	_taglineLabel.textColor = [UIColor colorWithWhite:1 alpha:0.85];
-	_taglineLabel.adjustsFontSizeToFitWidth = YES;
-	_taglineLabel.minimumScaleFactor = 0.8;
+	_taglineLabel.numberOfLines = 2;
 	[_clip addSubview:_taglineLabel];
 
 	_chip = [UIView new];
@@ -233,8 +232,10 @@ static BOOL SPPEnabled(void) {
 	const CGFloat side = 64;
 	_logo.frame = CGRectMake(20, (H - side) / 2, side, side);
 	CGFloat x = CGRectGetMaxX(_logo.frame) + 16, w = W - x - 16;
-	_nameLabel.frame = CGRectMake(x, H / 2 - 38, w, 32);
-	_taglineLabel.frame = CGRectMake(x, CGRectGetMaxY(_nameLabel.frame), w, 18);
+	// Name, tagline (1-2 lines) and chip as one block, centered vertically
+	CGFloat taglineH = ceil([_taglineLabel sizeThatFits:CGSizeMake(w, CGFLOAT_MAX)].height);
+	_nameLabel.frame = CGRectMake(x, (H - (32 + taglineH + 8 + 22)) / 2, w, 32);
+	_taglineLabel.frame = CGRectMake(x, CGRectGetMaxY(_nameLabel.frame), w, taglineH);
 
 	CGSize s = [_statusLabel sizeThatFits:CGSizeMake(w, 22)];
 	_chip.frame = CGRectMake(x, CGRectGetMaxY(_taglineLabel.frame) + 8, s.width + 30, 22);
