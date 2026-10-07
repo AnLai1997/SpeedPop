@@ -7,7 +7,7 @@ Tách ra từ tính năng bong bóng tốc độ của CarDuo (SplitCarPlay), b�
 
 - Dopamine rootless, iOS 15.0 – 16.6.1 (build với SDK 16.5)
 - Có xe CarPlay: bong bóng **chỉ** nằm trên màn xe, không hiện trên iPhone. Không có xe: nằm trên iPhone (xoay theo hướng máy).
-- Chỉ hiện sau khi đã mở app dẫn đường (trên iPhone hoặc CarPlay) rồi chuyển app đó xuống chạy nền; app tự chạy nền mà chưa được mở thì không hiện. Không đọc được tốc độ / giới hạn thì hiện `--`. Chỉ ẩn khi app dẫn đường hiện lại (trên iPhone hoặc CarPlay) hoặc khi app bị tắt.
+- Chỉ hiện sau khi đã mở app dẫn đường (trên iPhone hoặc CarPlay) rồi chuyển app đó xuống chạy nền; app tự chạy nền mà chưa được mở thì không hiện (kể cả khi CarPlay tự khởi chạy app để vẽ bản đồ trên Dashboard / màn đồng hồ lúc xe kết nối). Không đọc được tốc độ / giới hạn thì hiện `--`. Chỉ ẩn khi app dẫn đường hiện lại (trên iPhone hoặc CarPlay) hoặc khi app bị tắt.
 
 | App | Bundle ID |
 | --- | --- |

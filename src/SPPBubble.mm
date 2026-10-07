@@ -407,6 +407,7 @@ typedef NS_ENUM(NSInteger, SPPIconShape) {
 // Trang thai hien/an cua tung app (co the chay ca Vietmap lan GOFA cung luc)
 static BOOL sAppFg[8];
 static CFAbsoluteTime sAppSeenAt[8];
+static CFAbsoluteTime sAppFgSince[8];   // luc app bat dau hien
 static BOOL sAppOpened[8];       // app da duoc nguoi dung mo len man hinh (iPhone / CarPlay) tu lan chay nay
 static int sPreferredApp = -1;   // app mo gan nhat (nguon uu tien)
 
@@ -423,8 +424,12 @@ static int sPreferredApp = -1;   // app mo gan nhat (nguon uu tien)
     app &= 7;
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     if (fg != sAppFg[app]) SPPLog("bubble: %@ %@", SPPNavAppName(app), fg ? @"dang hien -> an bong bong" : @"chay nen -> hien bong bong");
+    if (fg && !sAppFg[app]) sAppFgSince[app] = now;
     sAppFg[app] = fg; sAppSeenAt[app] = now;
-    if (fg && !sAppOpened[app]) { sAppOpened[app] = YES; SPPLog("bubble: %@ da duoc mo", SPPNavAppName(app)); }
+    // Chi tinh la "da mo" khi app hien lien tuc >= 1.5 giay (bo qua lan active thoang qua luc he thong khoi chay app)
+    if (fg && !sAppOpened[app] && now - sAppFgSince[app] >= 1.5) {
+        sAppOpened[app] = YES; SPPLog("bubble: %@ da duoc mo", SPPNavAppName(app));
+    }
     // App tu chay nen ma chua tung duoc mo (vd he thong danh thuc) -> bo qua, khong hien bong bong
     if (!sAppOpened[app] && !self.demoTimer) return;
     if (fg) sPreferredApp = app;   // app nguoi dung mo gan nhat -> nguon uu tien khi ca 2 app cung chay

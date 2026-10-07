@@ -33,12 +33,16 @@ static BOOL SPPIsCircle(UIView *v)
     return v.layer.cornerRadius >= MIN(s.width, s.height) / 2 - 2;
 }
 
-// App dang hien (scene iPhone hoac CarPlay dang o tren cung) -> SpringBoard an bong bong
+// App dang hien (scene iPhone hoac CarPlay dang o tren cung) -> SpringBoard an bong bong.
+// Bo qua scene Dashboard / man dong ho CarPlay: he thong tu mo khi xe ket noi, nguoi dung chua mo app.
 static BOOL SPPAppForeground(void)
 {
     if (![NSThread isMainThread]) return NO;
     for (UIScene *sc in [UIApplication sharedApplication].connectedScenes) {
-        if (sc.activationState == UISceneActivationStateForegroundActive) return YES;
+        if (sc.activationState != UISceneActivationStateForegroundActive) continue;
+        NSString *role = sc.session.role;
+        if ([role containsString:@"Dashboard"] || [role containsString:@"InstrumentCluster"]) continue;
+        return YES;
     }
     return NO;
 }
