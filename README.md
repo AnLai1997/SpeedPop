@@ -36,7 +36,7 @@ Cài đặt > CarSpeed (Tiếng Việt / English, mặc định theo ngôn ngữ
 
 18 kiểu, kiểu nào cũng có icon của app đang cấp tốc độ: Thẻ ngang, Đĩa nhỏ, Biển báo lớn, Đồng hồ, Thanh HUD, Màu theo tốc độ, Cột dọc, Viên thuốc đôi, Neon, Thanh đo, Chữ nổi (không nền), Thẻ sáng, và nhóm lấy ý tưởng từ xe hơi theo phong cách HarmonyOS: Vô lăng, Bánh xe (mâm quay theo tốc độ), Thẻ HarmonyOS, Đồng hồ kim, Vòng kép HarmonyOS, Live View.
 
-Icon: `carspeedprefs/Resources/icon*.png` (Cài đặt), `CarSpeed.png` (icon gói trong Sileo/Zebra), `logo*.png` (thẻ đầu trang Cài đặt, thu nhỏ từ `assets/icon-1024.png`), bản gốc `assets/icon-1024.png` — kiểu HarmonyOS: màn CarPlay có bản đồ đêm chi tiết (dock 3 app màu, khu phố, sông, công viên, đường chính, lộ trình xanh, mũi tên xe) với biển giới hạn 60 nổi ở góc, trên nền squircle trắng; vẽ bằng `harmony_icon.py` của skill ios-tweak-format.
+Icon: `carspeedprefs/Resources/icon*.png` (Cài đặt), `CarSpeed.png` (icon gói trong Sileo/Zebra), `logo*.png` (thẻ đầu trang Cài đặt, thu nhỏ từ `assets/icon-1024.png`), bản gốc `assets/icon-1024.png` — kiểu HarmonyOS: màn CarPlay (dock 3 app) phía sau và iPhone phía trước, cả hai hiện bản đồ đêm có lộ trình xanh, cùng bong bóng tốc độ lớn (58 km/h + biển giới hạn 60) nổi phía trước; mỗi lớp có bóng đổ mềm hai tầng, trên nền trong suốt.
 
 ## Phát hành
 
